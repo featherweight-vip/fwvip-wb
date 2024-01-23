@@ -1,0 +1,4 @@
+uvmf:
+  benches:
+    fwvip_wb_b2b_tb:
+      top_env: fwvip_wb_b2b

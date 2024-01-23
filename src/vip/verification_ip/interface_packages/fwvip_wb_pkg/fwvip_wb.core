@@ -1,0 +1,24 @@
+CAPI=2:
+
+name: uvmf:interfaces:fwvip_wb
+
+filesets:
+  hvl:
+    files:
+    - "sv-uvm ? (fwvip_wb_pkg_hdl.sv)":
+         include_path: "."
+    - "sv-uvm ? (fwvip_wb_pkg.sv)":
+         include_path: "."
+    - "sv-uvm ? (src/fwvip_wb_if.sv)"
+    - "sv-uvm ? (src/fwvip_wb_monitor_bfm.sv)"
+    - "sv-uvm ? (src/fwvip_wb_driver_bfm.sv)"
+    file_type: systemVerilogSource
+    depend:
+      - ":uvmf:base_pkg"
+
+# TODO: add in DPI filesets
+
+targets:
+  default:
+    filesets:
+      - hvl

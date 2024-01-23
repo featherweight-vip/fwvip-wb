@@ -1,0 +1,10 @@
+uvmf:
+  environments:
+    fwvip_wb_b2b:
+      agents:
+        - name: wb_init
+          type: fwvip_wb 
+        - name: wb_targ
+          type: fwvip_wb 
+          initiator_responder: RESPONDER
+

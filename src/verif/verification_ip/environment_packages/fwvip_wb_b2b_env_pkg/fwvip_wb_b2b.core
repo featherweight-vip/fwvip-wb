@@ -1,0 +1,20 @@
+CAPI=2:
+
+name: uvmf:environments:fwvip_wb_b2b
+
+filesets:
+  hvl:
+    files:
+    - "sv-uvm ? (fwvip_wb_b2b_env_pkg.sv)":
+         include_path: "."
+    file_type: systemVerilogSource
+    depend:
+      - uvmf:interfaces:fwvip_wb
+      - ":uvmf:base_pkg"
+
+# TODO: add in DPI filesets
+
+targets:
+  default:
+    filesets:
+      - hvl

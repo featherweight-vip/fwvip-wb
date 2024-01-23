@@ -1,0 +1,50 @@
+uvmf:
+  interfaces:
+    fwvip_wb:
+      clock: clock
+      reset: reset
+
+      ports:
+        - name: adr
+          width: "32"
+          dir: output
+        - name: cyc
+          width: "1"
+          dir: output
+        - name: ack
+          width: "1"
+          dir: input
+        - name: err
+          width: "1"
+          dir: input
+        - name: sel
+          width: "4"
+          dir: output
+        - name: stb
+          width: "1"
+          dir: output
+        - name: we
+          width: "1"
+          dir: output
+        - name: dat_w
+          width: "32"
+          dir: output
+        - name: dat_r
+          width: "32"
+          dir: input
+      
+      transaction_vars:
+        - name: adr
+          type: "bit[31:0]"
+          isrand: "True"
+        - name: dat
+          type: "bit[31:0]"
+          isrand: "True"
+        - name: sel
+          type: "bit[3:0]"
+          isrand: "True"
+        - name: we
+          type: "bit"
+          isrand: "True"
+
+

@@ -1,0 +1,27 @@
+CAPI=2:
+
+name: uvmf:project_benches:fwvip_wb_b2b_tb
+
+filesets:
+  hvl:
+    files:
+    - "sv-uvm ? (tb/parameters/fwvip_wb_b2b_tb_parameters_pkg.sv)":
+         include_path: "tb/parameters"
+    - "sv-uvm ? (tb/sequences/fwvip_wb_b2b_tb_sequences_pkg.sv)":
+         include_path: "tb/sequences"
+    - "sv-uvm ? (tb/tests/fwvip_wb_b2b_tb_tests_pkg.sv)":
+         include_path: "tb/tests"
+    - "sv-uvm ? (tb/testbench/hdl_top.sv)":
+         include_path: "tb/testbench"
+    - "sv-uvm ? (tb/testbench/hvl_top.sv)":
+         include_path: "tb/testbench"
+    file_type: systemVerilogSource
+    depend:
+      - uvmf:environments:fwvip_wb_b2b
+
+# TODO: add in DPI filesets
+
+targets:
+  default:
+    filesets:
+      - hvl

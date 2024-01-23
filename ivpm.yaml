@@ -1,0 +1,28 @@
+
+package:
+  name: pyhdl-call-if
+
+  #  setup-deps:
+  #- ninja
+  #- cython
+
+  dep-sets:
+
+  - name: default
+    deps:
+    - name: pytest
+      src: pypi
+    - name: fusesoc
+      src: pypi
+
+  - name: default-dev
+    deps:
+    - name: pytest
+      src: pypi
+    - name: pytest-fv
+      url: https://github.com/fvutils/pytest-fv.git
+    - name: uvmf-core
+      url: https://github.com/fvutils/uvmf-core.git
+
+
+

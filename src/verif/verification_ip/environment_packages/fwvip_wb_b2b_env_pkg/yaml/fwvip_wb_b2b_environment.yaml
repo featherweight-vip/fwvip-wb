@@ -1,0 +1,23 @@
+uvmf:
+  environments:
+    fwvip_wb_b2b:
+      agents:
+      - initiator_responder: INITIATOR
+        name: wb_init
+        type: fwvip_wb
+      - initiator_responder: RESPONDER
+        name: wb_targ
+        type: fwvip_wb
+      analysis_components: []
+      analysis_exports: []
+      analysis_ports: []
+      config_constraints: []
+      config_vars: []
+      existing_library_component: 'True'
+      hvl_pkg_parameters: []
+      non_uvmf_components: []
+      parameters: []
+      qvip_memory_agents: []
+      scoreboards: []
+      subenvs: []
+      tlm_connections: []
