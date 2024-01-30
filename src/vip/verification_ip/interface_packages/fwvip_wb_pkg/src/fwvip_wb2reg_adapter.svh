@@ -30,7 +30,7 @@ class fwvip_wb2reg_adapter  extends uvm_reg_adapter;
     // Does the protocol the Agent is modeling support byte enables?
     // 0 = NO
     // 1 = YES
-    supports_byte_enable = 0;
+    supports_byte_enable = 1;
 
     // Does the Agent's Driver provide separate response sequence items?
     // i.e. Does the driver call seq_item_port.put() 
@@ -53,11 +53,19 @@ class fwvip_wb2reg_adapter  extends uvm_reg_adapter;
     // UVMF_CHANGE_ME : Fill in the reg2bus adapter mapping registe fields to protocol fields.
 
     //Adapt the following for your sequence item type
-    // trans_h.op = (rw.kind == UVM_READ) ? WB_READ : WB_WRITE;
+    trans_h.we = (rw.kind == UVM_WRITE)?1:0;
     //Copy over address
-    // trans_h.addr = rw.addr;
+    trans_h.adr = rw.addr;
     //Copy over write data
-    // trans_h.data = rw.data;
+    trans_h.dat = rw.data;
+
+    if (rw.n_bits >= 32) begin
+        trans_h.sel = 4'hf;
+    end else if (rw.n_bits > 8) begin
+        trans_h.sel = (4'h3 << 2*rw.addr[1]);
+    end else begin
+        trans_h.sel = (4'h1 << rw.addr[1:0]);
+    end
 
     // pragma uvmf custom reg2bus end
     
@@ -80,13 +88,13 @@ class fwvip_wb2reg_adapter  extends uvm_reg_adapter;
     // UVMF_CHANGE_ME : Fill in the bus2reg adapter mapping protocol fields to register fields.
     //Adapt the following for your sequence item type
     //Copy over instruction type 
-    // rw.kind = (trans_h.op == WB_WRITE) ? UVM_WRITE : UVM_READ;
+    rw.kind = (trans_h.we) ? UVM_WRITE : UVM_READ;
     //Copy over address
-    // rw.addr = trans_h.addr;
+    rw.addr = trans_h.adr;
     //Copy over read data
-    // rw.data = trans_h.data;
+    rw.data = trans_h.dat;
     //Check for errors on the bus and return UVM_NOT_OK if there is an error
-    // rw.status = UVM_IS_OK;
+    rw.status = UVM_IS_OK;
     // pragma uvmf custom bus2reg end
 
   endfunction: bus2reg
