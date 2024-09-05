@@ -1,0 +1,14 @@
+
+import function bit[8] fwvip_wb_initiator_read8(
+    int             inst_id,
+    bit[64]         addr);
+
+component fwvip_wb_c {
+    int             inst_id;
+
+    function bit[8] read8(bit[64] addr) {
+        return fwvip_wb_read8(inst_id);
+    }
+
+
+}

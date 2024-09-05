@@ -1,0 +1,41 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.2, pluggy-1.5.0
+rootdir: /home/mballance/projects/featherweight-vip/fwvip-wb
+configfile: pytest.ini
+collected 1 item
+
+test_initiator.py project: /home/mballance/projects/featherweight-vip/fwvip-wb
+Warning: no dependencies
+Warning: no dependencies
+Section: project fwvip-wb dict_keys(['project', 'export'])
+  Kind: lib-dirs dict_keys(['lib-dirs'])
+  Paths: ['/home/mballance/projects/featherweight-vip/fwvip-wb/tests', '/home/mballance/projects/featherweight-vip/fwvip-wb/src']
+Section: export pytest-fv dict_keys([])
+Section: export svt dict_keys(['project', 'export'])
+  Kind: lib-dirs dict_keys(['lib-dirs'])
+  Paths: ['/home/mballance/projects/featherweight-vip/fwvip-wb/packages/svt/src']
+Section: export svt dict_keys(['project', 'export'])
+  Kind: lib-dirs dict_keys(['lib-dirs'])
+  Paths: ['/home/mballance/projects/featherweight-vip/fwvip-wb/packages/fwvip-common/src']
+ret: ['/home/mballance/projects/featherweight-vip/fwvip-wb/tests', '/home/mballance/projects/featherweight-vip/fwvip-wb/src', '/home/mballance/projects/featherweight-vip/fwvip-wb/packages/svt/src', '/home/mballance/projects/featherweight-vip/fwvip-wb/packages/fwvip-common/src']
+Add-path /home/mballance/projects/featherweight-vip/fwvip-wb/tests
+Root: /home/mballance/projects/featherweight-vip/fwvip-wb
+Add-path /home/mballance/projects/featherweight-vip/fwvip-wb/src
+Add-path /home/mballance/projects/featherweight-vip/fwvip-wb/packages/svt/src
+Add-path /home/mballance/projects/featherweight-vip/fwvip-wb/packages/fwvip-common/src
+module: test_initiator
+Hello: /home/mballance/projects/featherweight-vip/fwvip-wb/rundir/test_initiator_test_smoke
+HdlSim: vlt
+module: test_initiator
+f: {'file_type': 'systemVerilogSource', 'name': 'svt_pkg.sv'}
+f: {'file_type': 'systemVerilogSource', 'is_include_file': True, 'name': 'svt_macros.svh'}
+f: {'file_type': 'systemVerilogSource', 'name': 'fwvip_pkg.sv'}
+f: {'file_type': 'systemVerilogSource', 'is_include_file': True, 'name': 'fwvip_macros.svh'}
+f: {'file_type': 'systemVerilogSource', 'name': 'sv/fwvip_wb_initiator.sv'}
+f: {'file_type': 'systemVerilogSource', 'name': 'sv/fwvip_wb_pkg.sv'}
+f: {'file_type': 'pssSource', 'name': 'pss/fwvip_wb_c.pss'}
+getFiles: stype=systemVerilogSource stypes=['verilogSource', 'systemVerilogSource']
+cmd: ['verilator', '--binary', '-sv', '-o', 'simv', '+incdir+/home/mballance/projects/featherweight-vip/fwvip-wb/packages/svt/src/', '+incdir+/home/mballance/projects/featherweight-vip/fwvip-wb/packages/fwvip-common/src/', '+incdir+/home/mballance/projects/featherweight-vip/fwvip-wb/src/sv', '-Wno-fatal', '--top-module', 'initiator_tb', '/home/mballance/projects/featherweight-vip/fwvip-wb/packages/svt/src/svt_pkg.sv', '/home/mballance/projects/featherweight-vip/fwvip-wb/packages/svt/src/svt_macros.svh', '/home/mballance/projects/featherweight-vip/fwvip-wb/packages/fwvip-common/src/fwvip_pkg.sv', '/home/mballance/projects/featherweight-vip/fwvip-wb/packages/fwvip-common/src/fwvip_macros.svh', '/home/mballance/projects/featherweight-vip/fwvip-wb/src/sv/fwvip_wb_initiator.sv', '/home/mballance/projects/featherweight-vip/fwvip-wb/src/sv/fwvip_wb_pkg.sv', '/home/mballance/projects/featherweight-vip/fwvip-wb/tests/svt/initiator/initiator_test_pkg.sv', '/home/mballance/projects/featherweight-vip/fwvip-wb/tests/svt/initiator/initiator_tb.sv', '-LDFLAGS', '-rdynamic']
+.
+
+============================== 1 passed in 3.89s ===============================

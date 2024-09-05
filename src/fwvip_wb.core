@@ -1,0 +1,22 @@
+CAPI=2:
+
+name: featherweight-vip::wb
+
+filesets:
+  sv:
+    files:
+      - sv/fwvip_wb_initiator.sv
+      - sv/fwvip_wb_pkg.sv
+    file_type: systemVerilogSource
+    depend: 
+      - featherweight-vip::common
+  pss:
+    files:
+      - pss/fwvip_wb_c.pss
+    file_type: pssSource
+
+targets:
+  default: 
+    filesets:
+    - sv
+    - pss

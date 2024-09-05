@@ -1,6 +1,6 @@
 
 package:
-  name: pyhdl-call-if
+  name: fwvip-wb
 
   #  setup-deps:
   #- ninja
@@ -21,8 +21,19 @@ package:
       src: pypi
     - name: pytest-fv
       url: https://github.com/fvutils/pytest-fv.git
-    - name: uvmf-core
-      url: https://github.com/fvutils/uvmf-core.git
+    - name: fwvip-common
+      url: https://github.com/featherweight-vip/fwvip-common.git
+    - name: svt
+      url: https://github.com/fvutils/svt.git
+  
+  paths:
+    project:
+      lib-dirs:
+      - tests
+      - src
+    export: {}
+      
+
 
 
 
