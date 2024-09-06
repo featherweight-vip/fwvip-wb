@@ -6,9 +6,16 @@ interface fwvip_wb_initiator #(
         input                       clock,
         input                       reset,
         output [ADDR_WIDTH-1:0]     adr,
+        output                      w,
         output [DATA_WIDTH-1:0]     dat_w,
         input [DATA_WIDTH-1:0]      dat_r
     );
+
+    always @(posedge clock or posedge reset) begin
+        if (reset) begin
+        end else begin
+        end
+    end
 
     task queue_req(
         input [ADDR_WIDTH-1:0]      adr,

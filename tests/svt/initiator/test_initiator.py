@@ -24,7 +24,7 @@ def test_smoke(initiator_tb_cfg, dirconfig):
     print("HdlSim: %s" % str(dirconfig.config.getHdlSim()))
 
     run_args = initiator_tb_cfg.sim.mkRunArgs(dirconfig.rundir())
-    run_args.plusargs.append("+SVT_TESTNAME=my_test")
+    run_args.plusargs.append("SVT_TESTNAME=my_test")
     initiator_tb_cfg.addTaskToPhase(
         "run.main", 
         initiator_tb_cfg.sim.mkRunTask(run_args))
