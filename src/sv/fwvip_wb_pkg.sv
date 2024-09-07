@@ -17,6 +17,9 @@ package fwvip_wb_pkg;
             return -1;
         endfunction
 
+        virtual task wait_reset();
+        endtask
+
         virtual task read8(
             output bit[7:0]     data,
             input bit[63:0]     addr);
@@ -60,7 +63,6 @@ package fwvip_wb_pkg;
     endclass
 
     class fwvip_wb_initiator_api_p #(type vif_t=int, int ADDR_WIDTH=32, int DATA_WIDTH=32) extends fwvip_wb_initiator_api;
-//        typedef fwvip_wb_initiator_api_p #(vif_t, ADDR_WIDTH, DATA_WIDTH) this_t;
         vif_t vif;
 
         function new(vif_t vif, string path);
@@ -76,54 +78,126 @@ package fwvip_wb_pkg;
             return DATA_WIDTH;
         endfunction
 
+        virtual task wait_reset();
+            vif.wait_reset();
+        endtask
+
+        function bit[DATA_WIDTH/8-1:0] stb(
+            input bit[ADDR_WIDTH-1:0]   addr,
+            input bit[3:0]              size);
+            case (size) 
+                1: stb = (DATA_WIDTH>8)?(1'b1 << addr[DATA_WIDTH/16-1:0]):1'b1;
+                2: stb = (DATA_WIDTH>16)?(2'b11 << {addr[DATA_WIDTH/16-1:1], 1'b0}):2'b11;
+                4: stb = (DATA_WIDTH>32)?(4'b1111 << {addr[DATA_WIDTH/16-1:2], 2'b00}):4'b1111;
+                8: stb = (DATA_WIDTH>64)?(8'b11111111 << {addr[DATA_WIDTH/16-1:3], 3'b000}):8'b11111111;
+            endcase
+        endfunction
+
+        function bit[63:0] extract_data(
+            input bit[DATA_WIDTH-1:0]   data,
+            input bit[ADDR_WIDTH-1:0]   addr,
+            input bit[3:0]              size);
+            if (size < DATA_WIDTH/8) begin
+                case (size) 
+                    1: extract_data = data[8*addr[1:0]+:8];
+                    2: extract_data = data[16*addr[1:1]+:16];
+                    4: extract_data = data[32*addr[2:1]+:32];
+                endcase
+            end else begin
+                return data;
+            end
+        endfunction
+
+        function bit[DATA_WIDTH-1:0] format_data(
+            input bit[63:0]             data,
+            input bit[ADDR_WIDTH-1:0]   addr,
+            input bit[3:0]              size);
+            if (size < DATA_WIDTH/8) begin
+                case (size) 
+                    1: format_data = {DATA_WIDTH/8{data[8*addr[1:0]+:8]}};
+                    2: format_data = {DATA_WIDTH/16{data[16*addr[1:1]+:16]}};
+                    4: format_data = {DATA_WIDTH/32{data[32*addr[2:1]+:32]}};
+                endcase
+            end else begin
+                return data;
+            end
+        endfunction
+
         virtual task read8(
             output bit[7:0]     data,
             input bit[63:0]     addr);
-            vif.queue_req(0, 0);
+            bit[DATA_WIDTH-1:0] data_tmp;
+            bit err;
+            vif.queue_req(addr, 0, {DATA_WIDTH/8{1'b1}}, 0);
+            vif.wait_ack(data_tmp, err);
+            data = extract_data(data_tmp, addr, 1);
         endtask
 
         virtual task read16(
             output bit[15:0]    data,
             input bit[63:0]     addr);
+            bit[DATA_WIDTH-1:0] data_tmp;
+            bit err;
+            vif.queue_req(addr, 0, {DATA_WIDTH/8{1'b1}}, 0);
+            vif.wait_ack(data_tmp, err);
+            data = extract_data(data_tmp, addr, 2);
         endtask
 
         virtual task read32(
             output bit[31:0]    data,
             input bit[63:0]     addr);
+            bit[DATA_WIDTH-1:0] data_tmp;
+            bit err;
+            vif.queue_req(addr, 0, {DATA_WIDTH/8{1'b1}}, 0);
+            vif.wait_ack(data_tmp, err);
+            data = extract_data(data_tmp, addr, 4);
         endtask
 
         virtual task read64(
             output bit[63:0]    data,
             input bit[63:0]     addr);
+            bit[DATA_WIDTH-1:0] data_tmp;
+            bit err;
+            vif.queue_req(addr, 0, {DATA_WIDTH/8{1'b1}}, 0);
+            vif.wait_ack(data_tmp, err);
+            data = extract_data(data_tmp, addr, 8);
         endtask
 
         virtual task write8(
             input bit[7:0]      data,
             input bit[63:0]     addr);
+            bit [DATA_WIDTH-1:0] data_r;
             bit err;
-            bit [DATA_WIDTH-1:0] dat_r;
-            vif.queue_req(0, 0);
-            vif.wait_ack(dat_r, err);
+            vif.queue_req(addr, format_data(data, addr, 1), stb(addr, 1), 1);
+            vif.wait_ack(data_r, err);
         endtask
 
         virtual task write16(
             input bit[15:0]     data,
             input bit[63:0]     addr);
+            bit [DATA_WIDTH-1:0] data_r;
+            bit err;
+            vif.queue_req(addr, format_data(data, addr, 2), stb(addr, 2), 1);
+            vif.wait_ack(data_r, err);
         endtask
 
         virtual task write32(
             input bit[31:0]     data,
             input bit[63:0]     addr);
+            bit [DATA_WIDTH-1:0] data_r;
+            bit err;
+            vif.queue_req(addr, format_data(data, addr, 4), stb(addr, 4), 1);
+            vif.wait_ack(data_r, err);
         endtask
 
         virtual task write64(
             input bit[63:0]    data,
             input bit[63:0]     addr);
+            bit [DATA_WIDTH-1:0] data_r;
+            bit err;
+            vif.queue_req(addr, format_data(data, addr, 8), stb(addr, 8), 1);
+            vif.wait_ack(data_r, err);
         endtask
-
-//        static function void register(vif_t vif);
-//            this_t api = new(vif);
-//        endfunction
 
     endclass
 
@@ -206,39 +280,7 @@ package fwvip_wb_pkg;
 
     endclass
 
-    fwvip_wb_initiator_api      prv_initiator_rgy[string];
-    fwvip_wb_initiator_api      prv_initiator_bfms[$];
-
-    function void register_initiator(fwvip_wb_initiator_api api);
-        prv_initiator_rgy[api.path] = api;
-        prv_initiator_bfms.push_back(api);
-    endfunction
-
-    function automatic fwvip_wb_initiator_api get_initiator(
-        string          path,
-        bit             suffix);
-        fwvip_wb_initiator_api ret;;
-        if (suffix) begin
-            foreach (prv_initiator_bfms[i]) begin
-                string bfm_path = prv_initiator_bfms[i].path;
-                if (path.len() <= bfm_path.len()) begin
-                    int x;
-                    for (x=0; x<path.len(); x++) begin
-                        if (path[path.len()-x-1] != bfm_path[bfm_path.len()-x-1]) begin
-                            break;
-                        end
-                    end
-                    if (x == path.len()) begin
-                        ret = prv_initiator_bfms[i];
-                        break;
-                    end
-                end
-            end
-        end else if (prv_initiator_rgy.exists(path)) begin
-            ret = prv_initiator_rgy[path];
-        end
-        return ret;
-    endfunction
+    `fwvip_bfm_rgy_decl(fwvip_wb, initiator, fwvip_wb_initiator_api);
 
 
 endpackage
