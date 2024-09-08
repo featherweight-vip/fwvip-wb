@@ -113,6 +113,7 @@ package fwvip_wb_pkg;
             input bit[ADDR_WIDTH-1:0]   addr,
             input bit[3:0]              size);
             if (size < DATA_WIDTH/8) begin
+//                format_data = {DATA_WIDTH/8{data[8*addr[size:0]+:size*8]}};
                 case (size) 
                     1: format_data = {DATA_WIDTH/8{data[8*addr[1:0]+:8]}};
                     2: format_data = {DATA_WIDTH/16{data[16*addr[1:1]+:16]}};
