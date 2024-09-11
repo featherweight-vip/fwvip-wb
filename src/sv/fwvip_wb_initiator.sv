@@ -18,8 +18,7 @@
         output reg                      cyc
     );
 
-    reg[1:0]        state;
-    reg[ADDR_WIDTH-1:0]     adr_r;
+    reg[1:0]                state;
     reg[DATA_WIDTH-1:0]     dat_w_r;
 
     reg[ADDR_WIDTH-1:0]     adr_q;
@@ -37,12 +36,15 @@
     always @(posedge clock or posedge reset) begin
         if (reset) begin
             state <= {2{1'b0}};
-//            adr_r <= {ADDR_WIDTH{1'b0}};
             dat_w_r <= {DATA_WIDTH{1'b0}};
             req_q = 0;
             ack_q = 0;
             in_reset <= 1'b1;
             have_reset <= 1'b0;
+            cyc <= 1'b0;
+            sel <= 1'b0;
+            we <= 1'b0;
+            state <= 2'b00;
         end else begin
             if (in_reset) begin
                 have_reset <= 1'b1;

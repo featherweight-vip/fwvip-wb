@@ -1,3 +1,4 @@
+`include "fwvip_macros.svh"
 
 package fwvip_wb_pkg;
     import fwvip_pkg::*;
@@ -88,8 +89,8 @@ package fwvip_wb_pkg;
             case (size) 
                 1: stb = (DATA_WIDTH>8)?(1'b1 << addr[DATA_WIDTH/16-1:0]):1'b1;
                 2: stb = (DATA_WIDTH>16)?(2'b11 << {addr[DATA_WIDTH/16-1:1], 1'b0}):2'b11;
-                4: stb = (DATA_WIDTH>32)?(4'b1111 << {addr[DATA_WIDTH/16-1:2], 2'b00}):4'b1111;
-                8: stb = (DATA_WIDTH>64)?(8'b11111111 << {addr[DATA_WIDTH/16-1:3], 3'b000}):8'b11111111;
+                4: stb = (DATA_WIDTH>32)?(4'b1111 << {addr[DATA_WIDTH/8-1:2], 2'b00}):4'b1111;
+                8: stb = (DATA_WIDTH>64)?(8'b11111111 << {addr[DATA_WIDTH/4-1:3], 3'b000}):8'b11111111;
             endcase
         endfunction
 
