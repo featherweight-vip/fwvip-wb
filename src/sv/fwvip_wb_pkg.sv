@@ -62,7 +62,8 @@ package fwvip_wb_pkg;
 
     endclass
 
-    class fwvip_wb_initiator_api_p #(type vif_t=int, int ADDR_WIDTH=32, int DATA_WIDTH=32) extends fwvip_wb_initiator_api;
+    class fwvip_wb_initiator_api_p #(type vif_t=int, int ADDR_WIDTH=32, int DATA_WIDTH=32) 
+        extends fwvip_wb_initiator_api;
         vif_t vif;
 
         function new(vif_t vif, string path);
@@ -281,7 +282,7 @@ package fwvip_wb_pkg;
 
     endclass
 
-    `fwvip_bfm_rgy_decl(fwvip_wb, initiator, fwvip_wb_initiator_api);
+//    `fwvip_bfm_rgy_decl(fwvip_wb, initiator, fwvip_wb_initiator_api);
 
 
 endpackage
