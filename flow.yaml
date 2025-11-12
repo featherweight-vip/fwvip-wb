@@ -1,0 +1,18 @@
+
+package:
+  name: org.featherweight-vip.fwvip-wb
+  with:
+    sim:
+      type: str 
+      value: "vlt"
+
+
+  imports:
+  - "${{ rootdir }}/packages/fwprotocol-defs/flow.yaml"
+  - "${{ rootdir }}/packages/fwvip-common/flow.yaml"
+
+  tasks: []
+
+  fragments:
+  - src/vip/vip.yaml
+  - src/verif/verif.yaml

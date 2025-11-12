@@ -1,0 +1,15 @@
+fragment:
+
+  tasks:
+  - name: test-base
+    uses: hdlsim.${{sim}}.SimRun
+    needs: [uvm-sim-img]
+    with:
+      plusargs:
+      - UVM_TESTNAME=fwvip_wb_test_base
+
+  - name: test-init
+    uses: test-base
+    with:
+      plusargs:
+      - UVM_TESTNAME=fwvip_wb_test_init

@@ -1,0 +1,102 @@
+
+fragment: 
+
+  tasks:
+  - name: tb-hvlsrc
+    uses: std.FileSet
+    with:
+      type: systemVerilogSource
+      base: tb
+      include: "*.sv"
+
+  - name: sim-img
+    uses: hdlsim.${{sim}}.SimImage
+    needs:
+    - hdlsim.${{sim}}.SimLibUVM
+    - sv-hvlsrc
+    - tb-hvlsrc
+    with:
+      trace: true
+      defines:
+      - TRACE_EN
+
+  - name: sim-run
+    uses: hdlsim.${{sim}}.SimRun
+    needs:
+    - sim-img
+
+  - name: b2b-tb-src
+    uses: std.FileSet
+    with:
+      type: systemVerilogSource
+      base: tb
+      include: ["fwvip_wb_transactor_b2b.sv"]
+
+  - name: b2b-sim-img
+    uses: hdlsim.${{sim}}.SimImage
+    needs:
+    - sv-hvlsrc
+    - b2b-tb-src
+    with:
+      top: ["fwvip_wb_transactor_b2b"]
+      trace: true
+      defines:
+      - TRACE_EN
+
+  - name: b2b-sim-run
+    uses: hdlsim.${{sim}}.SimRun
+    needs:
+    - b2b-sim-img
+
+  - name: env
+    uses: std.FileSet
+    needs: [vip-uvm-hvlsrc]
+    with:
+      type: systemVerilogSource
+      base: env
+      incdirs: ["."]
+      include: "*.sv"
+
+  - name: tests
+    uses: std.FileSet
+    needs: [env]
+    with:
+      type: systemVerilogSource
+      base: tests
+      incdirs: ["."]
+      include: "*.sv"
+
+  - name: uvm-tb
+    uses: std.FileSet
+    needs: [tests]
+    with:
+      type: systemVerilogSource
+      base: tb
+      incdirs: ["."]
+      include:
+      - fwvip_wb_hdl_top.sv
+      - fwvip_wb_hvl_top.sv
+
+  - name: uvm-sim-img
+    uses: hdlsim.${{sim}}.SimImage
+    needs:
+    - org.featherweight-ip.protocol-defs.all-rtlsrc
+    - hdlsim.${{sim}}.SimLibUVM
+    - sv-hvlsrc
+    - uvm-tb
+    with:
+      top: [fwvip_wb_hvl_top]
+      trace: true
+      defines:
+      - TRACE_EN
+  - name: uvm-sim-run
+    uses: hdlsim.${{sim}}.SimRun
+    needs:
+    - uvm-sim-img
+    with:
+      plusargs:
+      - UVM_TESTNAME=fwvip_wb_test_base
+
+  fragments:
+  - tests/tests.yaml
+

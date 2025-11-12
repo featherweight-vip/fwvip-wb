@@ -1,0 +1,25 @@
+
+fragment:
+  tasks:
+  - name: sv-hvlsrc
+    uses: std.FileSet
+    needs: 
+    - org.featherweight-ip.protocol-defs.all-rtlsrc
+    - org.featherweight-vip.fwvip-common.src
+    with:
+      type: systemVerilogSource
+      base: sv
+      include: 
+      - fwvip_wb_initiator_core.sv
+      - fwvip_wb_initiator_if.sv
+      - fwvip_wb_target_core.sv
+      - fwvip_wb_target_if.sv
+      incdirs: ["."]
+  - name: vip-uvm-hvlsrc
+    needs: [sv-hvlsrc]
+    uses: std.FileSet
+    with:
+      type: systemVerilogSource
+      base: uvm
+      include: "*.sv"
+      incdirs: ["."]
