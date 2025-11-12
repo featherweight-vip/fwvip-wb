@@ -10,10 +10,8 @@ package:
 
   - name: default
     deps:
-    - name: pytest
-      src: pypi
-    - name: fusesoc
-      src: pypi
+    - name: fwvip-common
+      url: https://github.com/featherweight-vip/fwvip-common.git
 
   - name: default-dev
     deps:
@@ -35,7 +33,9 @@ package:
       lib-dirs:
       - tests
       - src
-    export: {}
+    export:
+      lib-dirs:
+      - src
       
 
 
