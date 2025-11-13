@@ -136,7 +136,9 @@
         input                           we);
         req_s r;
         r = '{adr: adr, dat: dat, we: we, stb: sel};
+        $display("--> request.put");
         req_fifo.put(r);
+        $display("<-- request.put");
     endtask
 
     task response(

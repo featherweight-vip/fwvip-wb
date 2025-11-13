@@ -23,8 +23,12 @@ class fwvip_wb_initiator_driver extends uvm_driver #(fwvip_wb_transaction);
     task run_phase(uvm_phase phase);
         fwvip_wb_transaction t;
         forever begin
-            seq_item_port.get(t);
+            $display("--> driver.get");
+            seq_item_port.get_next_item(t);
+            $display("<-- driver.get");
+            $display("--> access");
             m_cfg.access(t);
+            $display("<-- access");
             seq_item_port.item_done();
         end
     endtask

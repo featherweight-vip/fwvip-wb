@@ -10,6 +10,7 @@ fragment:
       type: systemVerilogSource
       base: sv
       include: 
+      - fwvip_wb_bfm_pkg.sv
       - fwvip_wb_initiator_core.sv
       - fwvip_wb_initiator_if.sv
       - fwvip_wb_target_core.sv

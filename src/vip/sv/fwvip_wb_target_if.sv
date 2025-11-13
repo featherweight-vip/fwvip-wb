@@ -13,6 +13,7 @@
         input reset,
         `WB_TARGET_PORT(t, ADDR_WIDTH, DATA_WIDTH)
     );
+    import fwvip_wb_bfm_pkg::*;
 
     // RV channels between core and FIFOs
     logic [REQ_WIDTH-1:0]  req_dat;
@@ -91,6 +92,29 @@
     task wait_reset();
         if (reset) @(negedge reset);
         @(posedge clock);
+    endtask
+
+    task wait_req(
+        output [ADDR_WIDTH_MAX-1:0]     adr,
+        output [DATA_WIDTH_MAX-1:0]     dat,
+        output [(DATA_WIDTH_MAX/8)-1:0] sel,
+        output                          we);
+        req_s r;
+        $display("--> %0t wait_req", $time);
+        req_fifo.get(r);
+        adr = r.adr;
+        dat = r.dat;
+        sel = r.stb;
+        we  = r.we;
+        $display("<-- %0t wait_req", $time);
+    endtask
+
+    task send_rsp(
+        input [DATA_WIDTH_MAX-1:0]    dat,
+        input                         err);
+        rsp_s r;
+        r = '{dat: dat, err: err};
+        rsp_fifo.put(r);
     endtask
 
     // Get next incoming Wishbone request (produced by core)
