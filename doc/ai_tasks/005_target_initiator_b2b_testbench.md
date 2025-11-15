@@ -1,0 +1,3 @@
+
+# Prompt
+Create a new back-to-back testbench in tb/fwvip_wb_transactor_b2b.sv that instances the initiator and target transactor back-to-back. Add a test sequence that references the FIFO put/get tasks on the FIFOs inside the transactors. Add build-flow (.yaml) support for creating and running a simulation image. You can run the build flow with `dfm run <taskname>`. Iterate until the test builds, runs, and passes 

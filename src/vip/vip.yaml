@@ -15,6 +15,8 @@ fragment:
       - fwvip_wb_initiator_if.sv
       - fwvip_wb_target_core.sv
       - fwvip_wb_target_if.sv
+      - fwvip_wb_monitor_core.sv
+      - fwvip_wb_monitor_if.sv
       incdirs: ["."]
   - name: vip-uvm-hvlsrc
     needs: [sv-hvlsrc]

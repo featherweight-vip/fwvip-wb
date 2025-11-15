@@ -9,7 +9,30 @@ def initiator_tb_cfg(dirconfig : pfv.DirConfig):
     testdir = os.path.dirname(os.path.abspath(__file__))
     flow = pfv.FlowSim(dirconfig)
 
-    flow.addFileset("sim", pfv.FSVlnv("featherweight-vip::wb", ("systemVerilogSource",)))
+    # Use local VIP sources instead of external vlnv
+    flow.addFileset("sim",
+            pfv.FSPaths(
+                os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "src/vip/sv"),
+                [
+                    "fwvip_wb_bfm_pkg.sv",
+                    "fwvip_wb_initiator_core.sv",
+                    "fwvip_wb_initiator_if.sv",
+                    "fwvip_wb_target_core.sv",
+                    "fwvip_wb_target_if.sv",
+                    "fwvip_wb_monitor_core.sv",
+                    "fwvip_wb_monitor_if.sv",
+                    "../uvm/fwvip_wb_pkg.sv"
+                ],
+                stype="systemVerilogSource",
+                incs=[
+                    os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "packages/uvm/src"),
+                    os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "src/vip/sv"),
+                    os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "src/vip/uvm"),
+                    os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "packages/fwprotocol-defs/verilog/rtl"),
+                    os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "packages/fwvip-common/src/vip")
+                ]
+            )
+    )
     flow.addFileset("sim",
             pfv.FSPaths(
                 dirconfig.test_srcdir(), [
@@ -17,7 +40,10 @@ def initiator_tb_cfg(dirconfig : pfv.DirConfig):
                 "sv/initiator_tb.sv",
             ], 
             stype="systemVerilogSource",
-            incs=["sv"]))
+            incs=[
+                "sv",
+                os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "packages/svt/src")
+            ]))
     flow.sim.top.add("initiator_tb")
 
     flow.sim.debug = True

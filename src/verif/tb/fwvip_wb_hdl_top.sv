@@ -1,8 +1,11 @@
 `include "wishbone_macros.svh"
+`include "rv_macros.svh"
+`include "fwvip_macros.svh"
 
 module fwvip_wb_hdl_top;
   import uvm_pkg::*;
   import fwvip_wb_pkg::*;
+  import fwvip_wb_bfm_pkg::*;
 
   // Clock / Reset
   logic clock = 1'b0;
@@ -42,6 +45,16 @@ module fwvip_wb_hdl_top;
     .clock(clock),
     .reset(reset),
     `WB_CONNECT(t, wb_)
+  );
+
+  // Monitor interface instance (passive)
+  fwvip_wb_monitor_if #(
+    .ADDR_WIDTH(ADDR_WIDTH),
+    .DATA_WIDTH(DATA_WIDTH)
+    ) u_monitor (
+    .clock(clock),
+    .reset(reset),
+    `WB_CONNECT(i, wb_)
   );
 
   initial begin
