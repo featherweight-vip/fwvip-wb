@@ -11,7 +11,7 @@
 // REQ vector layout: { adr, dat_w, stb(byte-enables), we }
 // RSP vector layout: { dat_r, err }
 
-interface fwvip_wb_target_core #(
+`fwvip_bfm_t fwvip_wb_target_core #(
     parameter ADDR_WIDTH = 32,
     parameter DATA_WIDTH = 32,
     parameter REQ_WIDTH  = (ADDR_WIDTH + DATA_WIDTH + (DATA_WIDTH/8) + 1),
@@ -19,24 +19,9 @@ interface fwvip_wb_target_core #(
 ) (
     input  clock,
     input  reset,
-    // Wishbone target (slave) port
-    input [ADDR_WIDTH-1:0]     tadr,
-    input [DATA_WIDTH-1:0]     tdat_w,
-    output [DATA_WIDTH-1:0]    tdat_r,
-    input                      tcyc,
-    output                     terr,
-    input [DATA_WIDTH/8-1:0]   tsel,
-    input                      tstb,
-    output                     tack,
-    input                      twe,
-    // RV request (produced by this target)
-    output [REQ_WIDTH-1:0]     req_dat,
-    output                     req_valid,
-    input                      req_ready,
-    // RV response (consumed by this target)
-    input [RSP_WIDTH-1:0]      rsp_dat,
-    input                      rsp_valid,
-    output                     rsp_ready
+    `WB_TARGET_PORT(t, ADDR_WIDTH, DATA_WIDTH),
+    `RV_INITIATOR_PORT(req_, REQ_WIDTH),
+    `RV_TARGET_PORT(rsp_, RSP_WIDTH)
 );
 
     // --------------------------------------------------------------------
@@ -227,4 +212,4 @@ interface fwvip_wb_target_core #(
         end
     end
 
-endinterface
+`fwvip_bfm_t_end

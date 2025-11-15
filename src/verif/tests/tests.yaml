@@ -13,3 +13,9 @@ fragment:
     with:
       plusargs:
       - UVM_TESTNAME=fwvip_wb_test_init
+
+  - name: test-reg
+    uses: test-base
+    with:
+      plusargs:
+      - UVM_TESTNAME=fwvip_wb_test_reg

@@ -15,4 +15,6 @@ package fwvip_wb_pkg;
     `include "fwvip_wb_target_seq.svh"
     `include "fwvip_wb_transaction.svh"
 
-endpackage
+    `include "fwvip_wb_reg_adapter.svh"
+ 
+ endpackage
