@@ -2,6 +2,7 @@
 `include "wishbone_macros.svh"
 `include "rv_macros.svh"
 `include "fwvip_macros.svh"
+`include "fwvip_wb_bfm_macros.svh"
 
 `fwvip_bfm_t fwvip_wb_initiator_core #(
         parameter ADDR_WIDTH = 32,
@@ -16,17 +17,8 @@
         `RV_INITIATOR_PORT(rsp_, RSP_WIDTH)
     );
 
-    typedef struct packed {
-        bit[ADDR_WIDTH-1:0]     adr;
-        bit[DATA_WIDTH-1:0]     dat;
-        bit                     we;
-        bit[(DATA_WIDTH/8)-1:0] stb;
-    } req_s;
-
-    typedef struct packed {
-        bit[DATA_WIDTH-1:0]     dat;
-        bit                     err;
-    } rsp_s;
+    typedef `FWVIP_WB_INITIATOR_REQ_S(ADDR_WIDTH, DATA_WIDTH) req_s;
+    typedef `FWVIP_WB_INITIATOR_RSP_S(ADDR_WIDTH, DATA_WIDTH) rsp_s;
 
     // --------------------------------------------------------------------
     // Wishbone Initiator Transactor
