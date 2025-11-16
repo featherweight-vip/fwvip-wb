@@ -126,4 +126,5 @@ fragment:
 
   fragments:
   - tests/tests.yaml
+  - formal/formal.yaml
 

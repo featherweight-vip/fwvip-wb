@@ -67,7 +67,10 @@
     // Pack request vector from latched fields
     req_s req_u;
     always_comb begin
-        req_u = '{adr: adr_q, dat: dat_w_q, we: we_q, stb: stb_q};
+        req_u.adr = adr_q;
+        req_u.dat = dat_w_q;
+        req_u.we = we_q;
+        req_u.stb = stb_q;
     end
     assign req_dat   = req_u;
     assign req_valid = req_valid_r;

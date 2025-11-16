@@ -63,7 +63,7 @@
     reg                      rsp_valid_r;
 
     // Pack response
-    assign rsp_dat   = rsp_s'{dat: dat_r_q, err: err_q};
+//    assign rsp_dat   = rsp_s'{dat: dat_r_q, err: err_q};
     assign rsp_valid = rsp_valid_r;
 
     // Request ready when idle
@@ -111,7 +111,9 @@
                         istb_r      <= 1'b1;
                         icyc_r      <= 1'b1;
                         state       <= BUS;
+`ifdef DEBUG
                         $display("[INIT][%0t] IDLE->BUS adr=0x%08x dat=0x%08x we=%0b stb=%0h", $time, req_u.adr, req_u.dat, req_u.we, req_u.stb);
+`endif
                     end
                 end
                 BUS: begin
@@ -123,7 +125,9 @@
                         icyc_r      <= 1'b0;
                         rsp_valid_r <= 1'b1;
                         state       <= RESP;
+`ifdef DEBUG
                         $display("[INIT][%0t] BUS->RESP term ack=%0b err=%0b dat_r=0x%08x", $time, iack, ierr, idat_r);
+`endif
                     end
                 end
                 RESP: begin
@@ -131,7 +135,9 @@
                     if (rsp_fire) begin
                         rsp_valid_r <= 1'b0;
                         state       <= IDLE;
+`ifdef DEBUG
                         $display("[INIT][%0t] RESP->IDLE rsp consumed", $time);
+`endif
                     end
                 end
                 default: state <= IDLE;
