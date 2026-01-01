@@ -113,7 +113,7 @@
         input [DATA_WIDTH_MAX-1:0]    dat,
         input                         err);
         rsp_s r;
-        r = '{dat: dat, err: err};
+        r = '{dat: dat[DATA_WIDTH-1:0], err: err};
         rsp_fifo.put(r);
     endtask
 

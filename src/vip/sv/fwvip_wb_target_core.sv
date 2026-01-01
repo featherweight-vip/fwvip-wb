@@ -1,6 +1,7 @@
 `include "wishbone_macros.svh"
 `include "rv_macros.svh"
 `include "fwvip_macros.svh"
+`include "fwvip_wb_bfm_macros.svh"
 
 // Wishbone Target (Slave) Core Transactor
 // - Observes Wishbone target signals (t*)
@@ -8,10 +9,10 @@
 // - Waits for RV response (rsp_), then returns ACK (tack) or ERR (terr)
 // - Single outstanding transaction (no pipelining)
 
-// REQ vector layout: { adr, dat_w, stb(byte-enables), we }
+// REQ vector layout: { adr, dat_w, sel(byte-enables), we }
 // RSP vector layout: { dat_r, err }
 
-interface fwvip_wb_target_core #(
+`fwvip_bfm_t fwvip_wb_target_core #(
     parameter ADDR_WIDTH = 32,
     parameter DATA_WIDTH = 32,
     parameter REQ_WIDTH  = (ADDR_WIDTH + DATA_WIDTH + (DATA_WIDTH/8) + 1),
@@ -19,40 +20,16 @@ interface fwvip_wb_target_core #(
 ) (
     input  clock,
     input  reset,
-    // Wishbone target (slave) port
-    input [ADDR_WIDTH-1:0]     tadr,
-    input [DATA_WIDTH-1:0]     tdat_w,
-    output [DATA_WIDTH-1:0]    tdat_r,
-    input                      tcyc,
-    output                     terr,
-    input [DATA_WIDTH/8-1:0]   tsel,
-    input                      tstb,
-    output                     tack,
-    input                      twe,
-    // RV request (produced by this target)
-    output [REQ_WIDTH-1:0]     req_dat,
-    output                     req_valid,
-    input                      req_ready,
-    // RV response (consumed by this target)
-    input [RSP_WIDTH-1:0]      rsp_dat,
-    input                      rsp_valid,
-    output                     rsp_ready
+    `WB_TARGET_PORT(t, ADDR_WIDTH, DATA_WIDTH),
+    `RV_INITIATOR_PORT(req_, REQ_WIDTH),
+    `RV_TARGET_PORT(rsp_, RSP_WIDTH)
 );
 
     // --------------------------------------------------------------------
     // Packed request/response structures (match initiator core semantics)
     // --------------------------------------------------------------------
-    typedef struct packed {
-        bit [ADDR_WIDTH-1:0]      adr;
-        bit [DATA_WIDTH-1:0]      dat;
-        bit                       we;
-        bit [(DATA_WIDTH/8)-1:0]  stb;   // byte enables
-    } req_s;
-
-    typedef struct packed {
-        bit [DATA_WIDTH-1:0]      dat;
-        bit                       err;
-    } rsp_s;
+    typedef `FWVIP_WB_TARGET_REQ_S(ADDR_WIDTH, DATA_WIDTH) req_s;
+    typedef `FWVIP_WB_TARGET_RSP_S(ADDR_WIDTH, DATA_WIDTH) rsp_s;
 
     // --------------------------------------------------------------------
     // Internal Registers
@@ -60,7 +37,7 @@ interface fwvip_wb_target_core #(
     // Latched Wishbone request fields
     reg [ADDR_WIDTH-1:0]     adr_q;
     reg [DATA_WIDTH-1:0]     dat_w_q;
-    reg [(DATA_WIDTH/8)-1:0] stb_q;
+    reg [(DATA_WIDTH/8)-1:0] sel_q;
     reg                      we_q;
 
     // Response latches
@@ -82,7 +59,10 @@ interface fwvip_wb_target_core #(
     // Pack request vector from latched fields
     req_s req_u;
     always_comb begin
-        req_u = '{adr: adr_q, dat: dat_w_q, we: we_q, stb: stb_q};
+        req_u.adr = adr_q;
+        req_u.dat = dat_w_q;
+        req_u.we = we_q;
+        req_u.sel = sel_q;
     end
     assign req_dat   = req_u;
     assign req_valid = req_valid_r;
@@ -162,7 +142,7 @@ interface fwvip_wb_target_core #(
             // Clear latches
             adr_q       <= '0;
             dat_w_q     <= '0;
-            stb_q       <= '0;
+            sel_q       <= '0;
             we_q        <= 1'b0;
             dat_r_q     <= '0;
             err_q       <= 1'b0;
@@ -192,7 +172,7 @@ interface fwvip_wb_target_core #(
                         // Latch incoming bus request
                         adr_q       <= tadr;
                         dat_w_q     <= tdat_w;
-                        stb_q       <= tsel;    // treat Wishbone SEL as byte-enable vector
+                        sel_q       <= tsel;    // treat Wishbone SEL as byte-enable vector
                         we_q        <= twe;
                         // Initiate RV request
                         req_valid_r <= 1'b1;
@@ -227,4 +207,4 @@ interface fwvip_wb_target_core #(
         end
     end
 
-endinterface
+`fwvip_bfm_t_end

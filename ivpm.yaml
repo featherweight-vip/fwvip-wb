@@ -21,6 +21,8 @@ package:
       url: https://github.com/dv-flow/pytest-dfm.git
     - name: dv-flow-libhdlsim
       url: https://github.com/dv-flow/dv-flow-libhdlsim.git
+    - name: dv-flow-libformal
+      url: https://github.com/dv-flow/dv-flow-libformal.git
     - name: fwvip-common
       url: https://github.com/featherweight-vip/fwvip-common.git
     - name: fwprotocol-defs

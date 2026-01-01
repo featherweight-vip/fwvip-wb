@@ -8,6 +8,17 @@ typedef virtual fwvip_wb_initiator #(32,32) vif_t;
 reg clk = 0;
 reg rst = 1;
 
+// Simple wires to tap for monitor
+wire            mon_we;
+wire            mon_cyc;
+wire            mon_ack;
+wire            mon_err;
+wire [31:0]     mon_adr;
+wire [31:0]     mon_dat_w;
+wire [31:0]     mon_dat_r;
+wire [3:0]      mon_stb;
+wire            mon_sel;
+
 initial begin
     forever begin
         #10ns;
@@ -41,6 +52,32 @@ end
         .stb(stb),
         .ack(ack),
         .cyc(cyc)
+    );
+
+    // Tap DUT signals to monitor wires
+    assign mon_we    = we;
+    assign mon_cyc   = cyc;
+    assign mon_ack   = ack;
+    assign mon_err   = 1'b0; // no error in this simple TB
+    assign mon_adr   = adr;
+    assign mon_dat_w = dat_w;
+    assign mon_dat_r = dat_r;
+    assign mon_stb   = stb;
+    assign mon_sel   = sel;
+
+    // Instantiate the monitor BFM
+    fwvip_wb_monitor_if #(32,32) mon (
+        .clock(clk),
+        .reset(rst),
+        .iadr(mon_adr),
+        .idat_w(mon_dat_w),
+        .idat_r(mon_dat_r),
+        .iwe(mon_we),
+        .istb(mon_stb),
+        .isel(mon_stb), // map byte-enables to sel in monitor payload
+        .iack(mon_ack),
+        .ierr(mon_err),
+        .icyc(mon_cyc)
     );
 
     always @(posedge clk or posedge rst) begin
@@ -81,6 +118,19 @@ initial begin
 //    fwvip_wb_initiator_api_p #(vif_t, 32,32)::register(null);
     svt_runtest();
     $finish;
+end
+
+// Simple monitor print thread to demonstrate monitor activity
+initial begin
+    bit [63:0]  m_dat;
+    bit [63:0]  m_adr;
+    bit [7:0]   m_sel;
+    bit         m_we, m_err;
+    mon.wait_reset();
+    repeat (4) begin
+        mon.wait_txn(m_adr, m_dat, m_sel, m_we, m_err);
+        $display("[TB-MON] adr=0x%08x we=%0b dat=0x%08x sel=0x%0h err=%0b", m_adr[31:0], m_we, m_dat[31:0], m_sel[3:0], m_err);
+    end
 end
 
 initial begin

@@ -48,6 +48,25 @@ fragment:
     needs:
     - b2b-sim-img
 
+  - name: mon-tb-src
+    uses: std.FileSet
+    with:
+      type: systemVerilogSource
+      base: tb
+      include: ["fwvip_wb_transactor_core_b2b.sv"]
+
+  - name: mon-sim-img
+    uses: hdlsim.${{sim}}.SimImage
+    needs:
+    - sv-hvlsrc
+    - mon-tb-src
+    with:
+      top: ["fwvip_wb_transactor_core_b2b"]
+      trace: true
+      defines:
+      - TRACE_EN
+
+
   - name: env
     uses: std.FileSet
     needs: [vip-uvm-hvlsrc]
@@ -89,14 +108,23 @@ fragment:
       trace: true
       defines:
       - TRACE_EN
-  - name: uvm-sim-run
+  - name: uvm-sim-run-base
     uses: hdlsim.${{sim}}.SimRun
     needs:
     - uvm-sim-img
+  - name: uvm-sim-run
+    uses: uvm-sim-run-base
     with:
       plusargs:
       - UVM_TESTNAME=fwvip_wb_test_base
 
+  - name: mon-sim-run
+    uses: uvm-sim-run-base
+    with:
+      plusargs:
+      - UVM_TESTNAME=fwvip_wb_test_init
+
   fragments:
   - tests/tests.yaml
+  - formal/formal.yaml
 

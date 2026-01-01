@@ -29,6 +29,10 @@ class fwvip_wb_test_init extends fwvip_wb_test_base;
             $display("<-- start");
         end
         #1ms;
+        `uvm_info(get_name(), $sformatf("Monitor observed %0d txns", m_mon_sub.txn_count), UVM_LOW)
+        if (m_mon_sub.txn_count == 0) begin
+            `uvm_error(get_name(), "Monitor did not observe any transactions")
+        end
         phase.drop_objection(this, "");
         $display("<- run_phase %0t", $time);
     endtask

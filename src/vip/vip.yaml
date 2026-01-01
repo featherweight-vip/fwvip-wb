@@ -1,20 +1,31 @@
 
 fragment:
   tasks:
-  - name: sv-hvlsrc
+  - name: sv-hdlsrc
     uses: std.FileSet
-    needs: 
+    needs:
     - org.featherweight-ip.protocol-defs.all-rtlsrc
-    - org.featherweight-vip.fwvip-common.src
+    - org.featherweight-vip.fwvip-common.src-hdl
     with:
       type: systemVerilogSource
       base: sv
       include: 
       - fwvip_wb_bfm_pkg.sv
       - fwvip_wb_initiator_core.sv
-      - fwvip_wb_initiator_if.sv
       - fwvip_wb_target_core.sv
+      - fwvip_wb_monitor_core.sv
+  - name: sv-hvlsrc
+    uses: std.FileSet
+    needs: 
+    - sv-hdlsrc
+    - org.featherweight-vip.fwvip-common.src-hvl
+    with:
+      type: systemVerilogSource
+      base: sv
+      include: 
+      - fwvip_wb_initiator_if.sv
       - fwvip_wb_target_if.sv
+      - fwvip_wb_monitor_if.sv
       incdirs: ["."]
   - name: vip-uvm-hvlsrc
     needs: [sv-hvlsrc]
@@ -24,3 +35,10 @@ fragment:
       base: uvm
       include: "*.sv"
       incdirs: ["."]
+  - name: assertions
+    uses: std.FileSet
+    with:
+      type: systemVerilogSource
+      base: assertions
+      include:
+      - fwvip_wb_checker.sv

@@ -28,6 +28,18 @@ module fwvip_wb_hvl_top;
             32,
             u_hdl.u_target,
             "uvm_test_top.m_env.m_targ*");
+        `fwvip_wb_monitor_register(
+            32,
+            32,
+            u_hdl.u_monitor,
+            "uvm_test_top.m_env.m_mon*");
+
+        // Provide monitor config for agent
+        fwvip_wb_monitor_config_p#(virtual fwvip_wb_monitor_if#(32,32))::set(
+            null,
+            "uvm_test_top.m_env.m_mon",
+            "cfg",
+            u_hdl.u_monitor);
 
         run_test();
     end

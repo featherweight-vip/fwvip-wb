@@ -1,0 +1,33 @@
+
+fragment:
+  
+  tasks:
+  - name: initiator-tb-hdlsrc
+    uses: std.FileSet
+    with:
+      type: systemVerilogSource
+      include: fwvip_wb_initiator_formal_tb.sv
+
+  - name: initiator-tb-bmc
+    uses: formal.sby.BMC
+    needs: 
+    - sv-hdlsrc
+    - initiator-tb-hdlsrc
+    - assertions
+    with:
+      top: fwvip_wb_initiator_formal_tb
+
+  - name: initiator-tb-cover
+    uses: formal.sby.Core
+    needs: 
+    - sv-hdlsrc
+    - initiator-tb-hdlsrc
+    - assertions
+    with:
+      top: fwvip_wb_initiator_formal_tb
+      options: |
+        mode cover
+        multiclock on
+        depth 128
+      engines: |
+        smtbmc boolector
