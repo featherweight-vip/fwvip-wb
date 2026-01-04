@@ -14,9 +14,6 @@ class IInitiator(Protocol):
         ...
 
 
-class Object:
-    pass
-
 @zdc.dataclass(profile=zdc.profiles.RetargetableProfile)
 class InitiatorXtor(zdc.XtorComponent[IInitiator]):
     """Implements """
@@ -25,10 +22,9 @@ class InitiatorXtor(zdc.XtorComponent[IInitiator]):
     clock : zdc.bit = zdc.input()
     reset : zdc.bit = zdc.input()
     init : WishboneInitiator = zdc.bundle(
-        kwargs=lambda s:dict(
-            DATA_WIDTH=lambda s:s.DATA_WIDTH, 
-            ADDR_WIDTH=lambda s:s.ADDR_WIDTH))
-    abc : Object = zdc.field()
+        kwargs=lambda s: dict(
+            DATA_WIDTH=lambda s: s.DATA_WIDTH, 
+            ADDR_WIDTH=lambda s: s.ADDR_WIDTH))
     _adr : zdc.u32 = zdc.field()
     _dat_w : zdc.u32 = zdc.field()
     _dat_r : zdc.u32 = zdc.field()
