@@ -1,28 +1,23 @@
 from __future__ import annotations
 import zuspec.dataclasses as zdc
 from typing import Protocol, Tuple
+from org.featherweight_ip.protocol.core.wishbone import WishboneInitiator
+
 
 class IInitiator(Protocol):
-    async def access(self, 
-                        adr : zdc.u64, 
-                        dat_w : zdc.u64,
-                        sel : zdc.u8,
-                        we : zdc.bit) -> Tuple[zdc.bit, zdc.u64]: ...
+    async def access(
+            self, 
+            adr : zdc.u64, 
+            dat_w : zdc.u64,
+            sel : zdc.u8,
+            we : zdc.bit) -> Tuple[zdc.bit, zdc.u64]: 
+        ...
 
-@zdc.dataclass
-class WishboneInitiator(zdc.Bundle):
-    DATA_WIDTH : zdc.u32 = zdc.const(default=32)
-    ADDR_WIDTH : zdc.u32 = zdc.const(default=32)
-    adr : zdc.bitv = zdc.output(width=lambda s:s.ADDR_WIDTH)
-    dat_w : zdc.bitv = zdc.output(width=lambda s:s.DATA_WIDTH)
-    dat_r : zdc.bitv = zdc.input(width=lambda s:s.DATA_WIDTH)
-    cyc : zdc.bit = zdc.output()
-    err : zdc.bit = zdc.input()
-    sel : zdc.bitv = zdc.output(width=lambda s:int(s.DATA_WIDTH/8))
-    ack : zdc.bit = zdc.input()
-    we : zdc.bit = zdc.output()
 
-@zdc.dataclass
+class Object:
+    pass
+
+@zdc.dataclass(profile=zdc.profiles.RetargetableProfile)
 class InitiatorXtor(zdc.XtorComponent[IInitiator]):
     """Implements """
     DATA_WIDTH : zdc.u32 = zdc.const(default=32)
@@ -33,6 +28,7 @@ class InitiatorXtor(zdc.XtorComponent[IInitiator]):
         kwargs=lambda s:dict(
             DATA_WIDTH=lambda s:s.DATA_WIDTH, 
             ADDR_WIDTH=lambda s:s.ADDR_WIDTH))
+    abc : Object = zdc.field()
     _adr : zdc.u32 = zdc.field()
     _dat_w : zdc.u32 = zdc.field()
     _dat_r : zdc.u32 = zdc.field()
@@ -43,16 +39,17 @@ class InitiatorXtor(zdc.XtorComponent[IInitiator]):
     _ack : zdc.bit = zdc.field()
     _req_state : zdc.u8 = zdc.field()
 
-    def __bind__(self): return (
-        (self.xtor_if.access, self.access)
-    )
-
+    def __bind__(self):
+        return (
+            (self.xtor_if.access, self.access)
+        )
     
-    async def access(self, 
-                        adr : zdc.u64, 
-                        dat_w : zdc.u64,
-                        sel : zdc.u8,
-                        we : zdc.bit) -> Tuple[zdc.bit, zdc.u64]:
+    async def access(
+            self,
+            adr : zdc.u64, 
+            dat_w : zdc.u64,
+            sel : zdc.u8,
+            we : zdc.bit) -> Tuple[zdc.bit, zdc.u64]:
         """Accepts data and control for an access. Returns data and error status"""
         self._adr = adr
         self._dat_w = dat_w
@@ -71,8 +68,8 @@ class InitiatorXtor(zdc.XtorComponent[IInitiator]):
         self._req = 0
 
         return (self._err, self._dat_r)
-    
-    @zdc.sync(clock=lambda s:s.clock, reset=lambda s:s.reset)
+
+    @zdc.sync(clock=lambda s: s.clock, reset=lambda s: s.reset)
     def _req_fsm(self):
         if (self.reset):
             self._req_state = 0

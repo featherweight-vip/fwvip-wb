@@ -1,0 +1,42 @@
+# Flake8 configuration for Zuspec validation
+# This file configures the flake8 tool and the Zuspec IR checker
+
+[flake8]
+# Enable Zuspec checker (auto-enabled when zuspec-dataclasses is installed)
+zuspec-enabled = True
+
+# Default profile for classes without explicit @dataclass(profile=...)
+# Options: Retargetable, Python
+zuspec-profile = Retargetable
+
+# Standard flake8 settings
+max-line-length = 100
+exclude = 
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    packages/python,
+    build,
+    dist,
+    *.egg-info
+
+# Ignore certain flake8 rules that conflict with Zuspec patterns
+ignore = 
+    E501,
+    W503,
+    E203
+
+# Per-file ignores
+per-file-ignores =
+    __init__.py:F401,F403
+    tests/*:ZDC003
+
+# Show source code for errors
+show-source = True
+
+# Count errors
+count = True
+
+# Enable color output (if terminal supports it)
+color = auto

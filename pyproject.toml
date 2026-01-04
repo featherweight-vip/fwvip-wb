@@ -1,0 +1,35 @@
+# Root pyproject.toml for workspace
+# This configures tools at the workspace level
+
+[tool.flake8]
+# Note: flake8 doesn't officially support pyproject.toml yet,
+# so we keep settings in .flake8 file instead.
+# However, we can document the configuration here for reference.
+
+[tool.pytest.ini_options]
+# Pytest configuration
+testpaths = ["tests", "src"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "-v --tb=short"
+
+[tool.mypy]
+# MyPy configuration
+# Note: The MyPy plugin is deprecated - use flake8 for Zuspec validation
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+exclude = [
+    "packages/python",
+    "build",
+    "dist"
+]
+
+# Flake8 configuration reference
+# (Actual settings are in .flake8 file since flake8 doesn't read pyproject.toml)
+#
+# [tool.flake8]  # NOT SUPPORTED BY FLAKE8 YET
+# zuspec-enabled = true
+# zuspec-profile = "Retargetable"
+# max-line-length = 100

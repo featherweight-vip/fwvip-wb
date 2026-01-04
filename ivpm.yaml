@@ -17,6 +17,10 @@ package:
     deps:
     - name: pytest
       src: pypi
+    - name: pyright
+      src: pypi
+    - name: flake8
+      src: pypi
     - name: pytest-dfm
       url: https://github.com/dv-flow/pytest-dfm.git
     - name: dv-flow-libhdlsim

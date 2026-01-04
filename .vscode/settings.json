@@ -8,6 +8,46 @@
 
     "search.useIgnoreFiles": true,
     "search.useGlobalIgnoreFiles": true,
-    "python.testing.unittestEnabled": false
+    "python.testing.unittestEnabled": false,
+
+    // ===== FLAKE8 CONFIGURATION FOR ZUSPEC VALIDATION =====
+    // NOTE: VSCode Python extension has deprecated python.linting.* settings.
+    // This config supports both old and new approaches.
+    
+    // OLD APPROACH (Python extension built-in linting)
+    // These settings work with older Python extension versions
+    "python.linting.enabled": true,
+    "python.linting.flake8Enabled": true,
+    "python.linting.flake8Path": "${workspaceFolder}/packages/python/bin/flake8",
+    "python.linting.flake8Args": ["--config=${workspaceFolder}/.flake8"],
+    "python.linting.lintOnSave": true,
+    "python.linting.mypyEnabled": false,
+    "python.linting.pylintEnabled": false,
+    
+    // NEW APPROACH (Flake8 extension)
+    // Install: "ms-python.flake8" extension from marketplace
+    // Then flake8 extension will use these settings:
+    "flake8.path": ["${workspaceFolder}/packages/python/bin/flake8"],
+    "flake8.args": ["--config=${workspaceFolder}/.flake8"],
+    "flake8.severity": {
+        "E": "Error",
+        "F": "Error",
+        "W": "Warning",
+        "C": "Information",
+        "N": "Information",
+        "ZDC": "Error"
+    },
+    "flake8.importStrategy": "fromEnvironment",
+    "flake8.cwd": "${workspaceFolder}",
+    
+    // Editor settings for Python
+    "[python]": {
+        "editor.formatOnSave": false,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "never"
+        }
+    }
 }
+
+
 
