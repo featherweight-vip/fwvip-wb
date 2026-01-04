@@ -27,6 +27,9 @@ package:
       url: https://github.com/featherweight-vip/fwvip-common.git
     - name: fwprotocol-defs
       url: https://github.com/featherweight-ip/fwprotocol-defs.git
+    - name: zuspec
+      url: https://github.com/zuspec/zuspec.git
+      branch: mballance/simplify
     - name: uvm
       url: https://www.accellera.org/images/downloads/standards/uvm/Accellera-1800.2-2017-1.0.tar.gz
   
