@@ -57,6 +57,7 @@ class InitiatorXtor(zdc.XtorComponent[IInitiator]):
             await zdc.posedge(self.clock)
 
         self._req = 1
+        await zdc.posedge(self.clock)
 
         while not self._ack:
             await zdc.posedge(self.clock)

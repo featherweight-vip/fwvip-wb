@@ -83,7 +83,7 @@ def test_initiator_xtor_sim(tmpdir, sim):
     from zuspec.be.sv import SVGenerator
     output_dir = Path(tmpdir) / "sv"
     output_dir.mkdir(exist_ok=True)
-    generator = SVGenerator(output_dir)
+    generator = SVGenerator(output_dir, debug_annotations=True)
     sv_files = generator.generate(ctxt)
     
     # Find generated InitiatorXtor module name

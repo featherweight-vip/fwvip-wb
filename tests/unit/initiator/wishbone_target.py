@@ -28,9 +28,11 @@ class WishboneTarget(zdc.Component):
             self.ack = 0
             self.err = 0
             self.dat_r = 0
+            self._mem = 0
         else:
             match self._state:
                 case 0:
+                    self.ack = 0
                     if self.cyc:
                         self._state = 1
                         self.ack = 1
