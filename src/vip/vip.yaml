@@ -1,40 +1,54 @@
 
 fragment:
   tasks:
-  - name: sv-hdlsrc
+  # ----------------------------------------------------------------------
+  # Core transactors only -- pure module/signal level, no SV interfaces or
+  # classes. Suitable for use in a pure-Verilog environment.
+  # ----------------------------------------------------------------------
+  - export: xtor-core
+    uses: std.FileSet
+    with:
+      type: systemVerilogSource
+      base: sv
+      incdirs: ["."]
+      include:
+      - fwvip_wb_initiator_xtor_core.sv
+      - fwvip_wb_target_xtor_core.sv
+      - fwvip_wb_monitor_xtor_core.sv
+
+  # ----------------------------------------------------------------------
+  # SV + Verilog portion -- the transactor interfaces (in-built FIFOs +
+  # task API) and the integration modules that wire interface + core.
+  # ----------------------------------------------------------------------
+  - export: xtor-sv
     uses: std.FileSet
     needs:
-    - org.featherweight-ip.protocol-defs.all-rtlsrc
-    - org.featherweight-vip.fwvip-common.src-hdl
+    - xtor-core
     with:
       type: systemVerilogSource
       base: sv
-      include: 
-      - fwvip_wb_bfm_pkg.sv
-      - fwvip_wb_initiator_core.sv
-      - fwvip_wb_target_core.sv
-      - fwvip_wb_monitor_core.sv
-  - name: sv-hvlsrc
-    uses: std.FileSet
-    needs: 
-    - sv-hdlsrc
-    - org.featherweight-vip.fwvip-common.src-hvl
-    with:
-      type: systemVerilogSource
-      base: sv
-      include: 
-      - fwvip_wb_initiator_if.sv
-      - fwvip_wb_target_if.sv
-      - fwvip_wb_monitor_if.sv
       incdirs: ["."]
+      include:
+      - fwvip_wb_xtor_pkg.sv
+      - fwvip_wb_initiator_xtor_if.sv
+      - fwvip_wb_target_xtor_if.sv
+      - fwvip_wb_monitor_xtor_if.sv
+      - fwvip_wb_initiator_xtor.sv
+      - fwvip_wb_target_xtor.sv
+      - fwvip_wb_monitor_xtor.sv
+
+  # ----------------------------------------------------------------------
+  # UVM agent layer (classes) built on top of the SV transactors.
+  # ----------------------------------------------------------------------
   - name: vip-uvm-hvlsrc
-    needs: [sv-hvlsrc]
+    needs: [xtor-sv]
     uses: std.FileSet
     with:
       type: systemVerilogSource
       base: uvm
       include: "*.sv"
       incdirs: ["."]
+
   - name: assertions
     uses: std.FileSet
     with:

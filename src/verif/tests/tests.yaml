@@ -1,21 +1,75 @@
 fragment:
 
+  # --------------------------------------------------------------------------
+  # UVM simulation tests.
+  #
+  # Every test runs the same image + UVM test class (fwvip_wb_test_base); the
+  # scenario is chosen by the +SEQ=<virtual-sequence> plusarg. Each task below
+  # is a DFM root entrypoint -- run e.g.:
+  #   dfm run org.featherweight-vip.fwvip-wb.uvm-test-smoke
+  # Per-scenario knobs (e.g. +NUM_TXNS, +BASE_ADDR) can be appended as plusargs.
+  # --------------------------------------------------------------------------
+
   tasks:
-  - name: test-base
+  # Default smoke: block of writes then self-checked read-back
+  - name: uvm-test-smoke
     uses: hdlsim.${{sim}}.SimRun
     needs: [uvm-sim-img]
     with:
       plusargs:
       - UVM_TESTNAME=fwvip_wb_test_base
+      - SEQ=fwvip_wb_vseq_smoke
 
-  - name: test-init
-    uses: test-base
+  # Write-only traffic
+  - name: uvm-test-write
+    uses: hdlsim.${{sim}}.SimRun
+    needs: [uvm-sim-img]
     with:
       plusargs:
-      - UVM_TESTNAME=fwvip_wb_test_init
+      - UVM_TESTNAME=fwvip_wb_test_base
+      - SEQ=fwvip_wb_vseq_write
 
-  - name: test-reg
-    uses: test-base
+  # Write-then-read with explicit read-back checks
+  - name: uvm-test-read
+    uses: hdlsim.${{sim}}.SimRun
+    needs: [uvm-sim-img]
     with:
       plusargs:
-      - UVM_TESTNAME=fwvip_wb_test_reg
+      - UVM_TESTNAME=fwvip_wb_test_base
+      - SEQ=fwvip_wb_vseq_read
+
+  # Randomized mixed read/write traffic
+  - name: uvm-test-rand
+    uses: hdlsim.${{sim}}.SimRun
+    needs: [uvm-sim-img]
+    with:
+      plusargs:
+      - UVM_TESTNAME=fwvip_wb_test_base
+      - SEQ=fwvip_wb_vseq_rand
+
+  # Partial-SEL byte-enable patterns
+  - name: uvm-test-sel
+    uses: hdlsim.${{sim}}.SimRun
+    needs: [uvm-sim-img]
+    with:
+      plusargs:
+      - UVM_TESTNAME=fwvip_wb_test_base
+      - SEQ=fwvip_wb_vseq_sel
+
+  # ERR termination
+  - name: uvm-test-err
+    uses: hdlsim.${{sim}}.SimRun
+    needs: [uvm-sim-img]
+    with:
+      plusargs:
+      - UVM_TESTNAME=fwvip_wb_test_base
+      - SEQ=fwvip_wb_vseq_err
+
+  # Register-model front-door write/read via reg adapter
+  - name: uvm-test-reg
+    uses: hdlsim.${{sim}}.SimRun
+    needs: [uvm-sim-img]
+    with:
+      plusargs:
+      - UVM_TESTNAME=fwvip_wb_test_base
+      - SEQ=fwvip_wb_vseq_reg

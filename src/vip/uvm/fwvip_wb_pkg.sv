@@ -3,7 +3,7 @@
 
 package fwvip_wb_pkg;
     import uvm_pkg::*;
-    import fwvip_wb_bfm_pkg::*;
+    import fwvip_wb_xtor_pkg::*;
 
     `include "fwvip_wb_initiator.svh"
     `include "fwvip_wb_initiator_config.svh"

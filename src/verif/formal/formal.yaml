@@ -10,24 +10,26 @@ fragment:
 
   - name: initiator-tb-bmc
     uses: formal.sby.BMC
-    needs: 
-    - sv-hdlsrc
+    needs:
+    - xtor-core
     - initiator-tb-hdlsrc
     - assertions
     with:
       top: fwvip_wb_initiator_formal_tb
 
-  - name: initiator-tb-cover
-    uses: formal.sby.Core
-    needs: 
-    - sv-hdlsrc
-    - initiator-tb-hdlsrc
-    - assertions
-    with:
-      top: fwvip_wb_initiator_formal_tb
-      options: |
-        mode cover
-        multiclock on
-        depth 128
-      engines: |
-        smtbmc boolector
+# TODO: 'formal.sby.Core' (cover mode) was removed from dv-flow-libformal; only
+# 'formal.sby.BMC' (top, depth) remains. Re-enable once a cover task exists.
+#  - name: initiator-tb-cover
+#    uses: formal.sby.BMC
+#    needs:
+#    - sv-hdlsrc
+#    - initiator-tb-hdlsrc
+#    - assertions
+#    with:
+#      top: fwvip_wb_initiator_formal_tb
+#      options: |
+#        mode cover
+#        multiclock on
+#        depth 128
+#      engines: |
+#        smtbmc boolector

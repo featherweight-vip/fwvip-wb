@@ -1,6 +1,5 @@
 `include "wishbone_macros.svh"
 `include "rv_macros.svh"
-`include "fwvip_macros.svh"
 
 module fwvip_wb_transactor_core_b2b;
 
@@ -63,13 +62,13 @@ module fwvip_wb_transactor_core_b2b;
   // ------------------------------------------------------------------------
   // Instantiate Initiator Core
   // ------------------------------------------------------------------------
-  fwvip_wb_initiator_core #(
+  fwvip_wb_initiator_xtor_core #(
     .ADDR_WIDTH(ADDR_WIDTH),
     .DATA_WIDTH(DATA_WIDTH)
   ) u_initiator (
     .clock(clock),
     .reset(reset),
-    `WB_CONNECT(i, wb_),
+    `WB_CONNECT( , wb_),
     `RV_CONNECT(req_, init_req_),
     `RV_CONNECT(rsp_, init_rsp_)
   );
@@ -77,13 +76,13 @@ module fwvip_wb_transactor_core_b2b;
   // ------------------------------------------------------------------------
   // Instantiate Target Core
   // ------------------------------------------------------------------------
-  fwvip_wb_target_core #(
+  fwvip_wb_target_xtor_core #(
     .ADDR_WIDTH(ADDR_WIDTH),
     .DATA_WIDTH(DATA_WIDTH)
   ) u_target (
     .clock(clock),
     .reset(reset),
-    `WB_CONNECT(t, wb_),
+    `WB_CONNECT( , wb_),
     `RV_CONNECT(req_, tgt_req_),
     `RV_CONNECT(rsp_, tgt_rsp_)
   );

@@ -77,21 +77,21 @@ module fwvip_wb_target_formal_tb;
     end
 
     // Instantiate target core
-    fwvip_wb_target_core #(
+    fwvip_wb_target_xtor_core #(
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH)
     ) u_tgt (
         .clock(clock),
         .reset(reset),
-        .tadr(tadr),
-        .tdat_w(tdat_w),
-        .tdat_r(tdat_r),
-        .twe(twe),
-        .tstb(tstb),
-        .tsel(tsel),
-        .tack(tack),
-        .terr(terr),
-        .tcyc(tcyc),
+        .adr(tadr),
+        .dat_w(tdat_w),
+        .dat_r(tdat_r),
+        .we(twe),
+        .stb(tstb),
+        .sel(tsel),
+        .ack(tack),
+        .err(terr),
+        .cyc(tcyc),
         .req_dat(req_dat),
         .req_valid(req_valid),
         .req_ready(req_ready),

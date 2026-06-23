@@ -21,25 +21,25 @@ module fwvip_wb_hvl_top;
         `fwvip_wb_initiator_register(
             32,
             32,
-            u_hdl.u_initiator,
+            u_hdl.u_initiator.u_if,
             "uvm_test_top.m_env.m_init*");
         `fwvip_wb_target_register(
             32,
             32,
-            u_hdl.u_target,
+            u_hdl.u_target.u_if,
             "uvm_test_top.m_env.m_targ*");
         `fwvip_wb_monitor_register(
             32,
             32,
-            u_hdl.u_monitor,
+            u_hdl.u_monitor.u_if,
             "uvm_test_top.m_env.m_mon*");
 
         // Provide monitor config for agent
-        fwvip_wb_monitor_config_p#(virtual fwvip_wb_monitor_if#(32,32))::set(
+        fwvip_wb_monitor_config_p#(virtual fwvip_wb_monitor_xtor_if#(32,32))::set(
             null,
             "uvm_test_top.m_env.m_mon",
             "cfg",
-            u_hdl.u_monitor);
+            u_hdl.u_monitor.u_if);
 
         run_test();
     end

@@ -120,12 +120,13 @@ celerybeat.pid
 *.sage.py
 
 # Environments
+# NOTE: anchored to repo root so they do not match src/verif/env/ (the UVM env)
 #.env
 .venv
-env/
-venv/
-ENV/
-env.bak/
+/env/
+/venv/
+/ENV/
+/env.bak/
 venv.bak/
 
 # Spyder project settings
@@ -163,3 +164,8 @@ packages/
 verif_bak_*/
 vip_bak_*/
 rundir/
+.agents/
+.claude/
+.codex/
+.cursor/
+

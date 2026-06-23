@@ -63,22 +63,22 @@ module fwvip_wb_initiator_formal_tb(
     end
 
     // Instantiate initiator core
-    fwvip_wb_initiator_core #(
+    fwvip_wb_initiator_xtor_core #(
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH)
     ) u_init (
         .clock(clock),
         .reset(reset),
         // Wishbone
-        .iadr(iadr),
-        .idat_w(idat_w),
-        .idat_r(idat_r),
-        .iwe(iwe),
-        .istb(istb),
-        .isel(isel),
-        .iack(iack),
-        .ierr(ierr),
-        .icyc(icyc),
+        .adr(iadr),
+        .dat_w(idat_w),
+        .dat_r(idat_r),
+        .we(iwe),
+        .stb(istb),
+        .sel(isel),
+        .ack(iack),
+        .err(ierr),
+        .cyc(icyc),
         // RV req (target port)
         .req_dat(req_dat),
         .req_valid(req_valid),

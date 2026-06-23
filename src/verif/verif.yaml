@@ -1,72 +1,67 @@
 
-fragment: 
+fragment:
 
   tasks:
-  - name: tb-hvlsrc
+  # ----------------------------------------------------------------------
+  # Core back-to-back smoke: initiator core <-> target core (no SV layer).
+  # Uses the Wishbone/RV convenience macros from protocol-defs.
+  # ----------------------------------------------------------------------
+  - name: core-b2b-tb-src
     uses: std.FileSet
-    with:
-      type: systemVerilogSource
-      base: tb
-      include: "*.sv"
-
-  - name: sim-img
-    uses: hdlsim.${{sim}}.SimImage
     needs:
-    - hdlsim.${{sim}}.SimLibUVM
-    - sv-hvlsrc
-    - tb-hvlsrc
-    with:
-      trace: true
-      defines:
-      - TRACE_EN
-
-  - name: sim-run
-    uses: hdlsim.${{sim}}.SimRun
-    needs:
-    - sim-img
-
-  - name: b2b-tb-src
-    uses: std.FileSet
-    with:
-      type: systemVerilogSource
-      base: tb
-      include: ["fwvip_wb_transactor_b2b.sv"]
-
-  - name: b2b-sim-img
-    uses: hdlsim.${{sim}}.SimImage
-    needs:
-    - sv-hvlsrc
-    - b2b-tb-src
-    with:
-      top: ["fwvip_wb_transactor_b2b"]
-      trace: true
-      defines:
-      - TRACE_EN
-
-  - name: b2b-sim-run
-    uses: hdlsim.${{sim}}.SimRun
-    needs:
-    - b2b-sim-img
-
-  - name: mon-tb-src
-    uses: std.FileSet
+    - org.featherweight-ip.protocol-defs.all-rtlsrc
     with:
       type: systemVerilogSource
       base: tb
       include: ["fwvip_wb_transactor_core_b2b.sv"]
 
-  - name: mon-sim-img
+  - name: core-b2b-sim-img
     uses: hdlsim.${{sim}}.SimImage
     needs:
-    - sv-hvlsrc
-    - mon-tb-src
+    - xtor-core
+    - core-b2b-tb-src
     with:
       top: ["fwvip_wb_transactor_core_b2b"]
       trace: true
       defines:
       - TRACE_EN
 
+  - name: core-b2b-sim-run
+    uses: hdlsim.${{sim}}.SimRun
+    needs:
+    - core-b2b-sim-img
 
+  # ----------------------------------------------------------------------
+  # Monitor core standalone smoke
+  # ----------------------------------------------------------------------
+  - name: mon-tb-src
+    uses: std.FileSet
+    needs:
+    - org.featherweight-ip.protocol-defs.all-rtlsrc
+    with:
+      type: systemVerilogSource
+      base: tb
+      include: ["fwvip_wb_monitor_core_tb.sv"]
+
+  - name: mon-sim-img
+    uses: hdlsim.${{sim}}.SimImage
+    needs:
+    - xtor-core
+    - mon-tb-src
+    with:
+      top: ["fwvip_wb_monitor_core_tb"]
+      trace: true
+      defines:
+      - TRACE_EN
+
+  - name: mon-sim-run
+    uses: hdlsim.${{sim}}.SimRun
+    needs:
+    - mon-sim-img
+
+  # ----------------------------------------------------------------------
+  # UVM environment
+  # ----------------------------------------------------------------------
   - name: env
     uses: std.FileSet
     needs: [vip-uvm-hvlsrc]
@@ -101,30 +96,24 @@ fragment:
     needs:
     - org.featherweight-ip.protocol-defs.all-rtlsrc
     - hdlsim.${{sim}}.SimLibUVM
-    - sv-hvlsrc
+    - xtor-sv
     - uvm-tb
     with:
       top: [fwvip_wb_hvl_top]
       trace: true
       defines:
       - TRACE_EN
+
+  # Bare UVM run (no scenario selected -> base test runs the default smoke
+  # virtual sequence). Concrete per-test entrypoints live in tests/tests.yaml.
   - name: uvm-sim-run-base
     uses: hdlsim.${{sim}}.SimRun
     needs:
     - uvm-sim-img
-  - name: uvm-sim-run
-    uses: uvm-sim-run-base
     with:
       plusargs:
       - UVM_TESTNAME=fwvip_wb_test_base
 
-  - name: mon-sim-run
-    uses: uvm-sim-run-base
-    with:
-      plusargs:
-      - UVM_TESTNAME=fwvip_wb_test_init
-
   fragments:
   - tests/tests.yaml
   - formal/formal.yaml
-

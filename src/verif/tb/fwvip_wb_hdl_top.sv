@@ -1,11 +1,9 @@
 `include "wishbone_macros.svh"
-`include "rv_macros.svh"
-`include "fwvip_macros.svh"
 
 module fwvip_wb_hdl_top;
   import uvm_pkg::*;
   import fwvip_wb_pkg::*;
-  import fwvip_wb_bfm_pkg::*;
+  import fwvip_wb_xtor_pkg::*;
 
   // Clock / Reset
   logic clock = 1'b0;
@@ -24,43 +22,37 @@ module fwvip_wb_hdl_top;
   localparam int ADDR_WIDTH = 32;
   localparam int DATA_WIDTH = 32;
 
-  // Wishbone bus wires bundle
-  `WB_WIRES( wb_, ADDR_WIDTH, DATA_WIDTH);
+  // Shared Wishbone bus
+  `WB_WIRES(wb_, ADDR_WIDTH, DATA_WIDTH);
 
-  // Initiator core interface instance
-  fwvip_wb_initiator_if #(
+  // Initiator transactor (drives the bus)
+  fwvip_wb_initiator_xtor #(
     .ADDR_WIDTH(ADDR_WIDTH),
     .DATA_WIDTH(DATA_WIDTH)
-    ) u_initiator (
+  ) u_initiator (
     .clock(clock),
     .reset(reset),
     `WB_CONNECT( , wb_)
   );
 
-  // Target core interface instance
-  fwvip_wb_target_if #(
+  // Target transactor (responds on the bus)
+  fwvip_wb_target_xtor #(
     .ADDR_WIDTH(ADDR_WIDTH),
     .DATA_WIDTH(DATA_WIDTH)
-    ) u_target (
+  ) u_target (
     .clock(clock),
     .reset(reset),
-    `WB_CONNECT(t, wb_)
+    `WB_CONNECT( , wb_)
   );
 
-  // Monitor interface instance (passive)
-  fwvip_wb_monitor_if #(
+  // Monitor transactor (passively observes the bus)
+  fwvip_wb_monitor_xtor #(
     .ADDR_WIDTH(ADDR_WIDTH),
     .DATA_WIDTH(DATA_WIDTH)
-    ) u_monitor (
+  ) u_monitor (
     .clock(clock),
     .reset(reset),
-    `WB_CONNECT(i, wb_)
+    `WB_CONNECT( , wb_)
   );
-
-  initial begin
-    virtual fwvip_wb_initiator_if #(32,32) vif;
-    vif = u_initiator;
-//    fwvip_wb_config_p #(32,32)::set(u_initiator);
-  end
 
 endmodule

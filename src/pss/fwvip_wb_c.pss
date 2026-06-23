@@ -1,13 +1,21 @@
 
 import function bit[8] fwvip_wb_initiator_read8(
-    int             inst_id,
-    bit[64]         addr);
+    string          path,
+    bit[32]         addr);
+
+import function bit[16] fwvip_wb_initiator_read16(
+    string          path,
+    bit[32]         addr);
 
 component fwvip_wb_c {
-    int             inst_id;
+    string path;
 
     function bit[8] read8(bit[64] addr) {
         return fwvip_wb_read8(inst_id);
+    }
+
+    function bit[16] read8(bit[64] addr) {
+        return fwvip_wb_read16(inst_id);
     }
 
 

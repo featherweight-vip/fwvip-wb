@@ -1,6 +1,5 @@
 `include "wishbone_macros.svh"
 `include "rv_macros.svh"
-`include "fwvip_macros.svh"
 
 module fwvip_wb_monitor_core_tb;
   localparam int ADDR_WIDTH = 32;
@@ -16,8 +15,16 @@ module fwvip_wb_monitor_core_tb;
     reset = 1'b0;
   end
 
-  // WB wires
-  `WB_WIRES(wb_, ADDR_WIDTH, DATA_WIDTH)
+  // WB signals (driven procedurally by this TB, so declared as vars)
+  logic [ADDR_WIDTH-1:0]    wb_adr;
+  logic [DATA_WIDTH-1:0]    wb_dat_w;
+  logic [DATA_WIDTH-1:0]    wb_dat_r;
+  logic                     wb_cyc;
+  logic                     wb_err;
+  logic [DATA_WIDTH/8-1:0]  wb_sel;
+  logic                     wb_stb;
+  logic                     wb_ack;
+  logic                     wb_we;
 
   // RV wires
   logic [MON_WIDTH-1:0]  mon_dat;
@@ -25,14 +32,14 @@ module fwvip_wb_monitor_core_tb;
   logic                  mon_ready;
 
   // DUT
-  fwvip_wb_monitor_core #(
+  fwvip_wb_monitor_xtor_core #(
     .ADDR_WIDTH(ADDR_WIDTH),
     .DATA_WIDTH(DATA_WIDTH),
     .MON_WIDTH(MON_WIDTH)
   ) dut (
     .clock(clock),
     .reset(reset),
-    `WB_CONNECT(i, wb_),
+    `WB_CONNECT( , wb_),
     `RV_CONNECT(mon_, mon_)
   );
 
