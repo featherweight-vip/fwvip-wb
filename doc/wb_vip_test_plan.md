@@ -430,3 +430,26 @@ the corresponding transactor support lands:
 
 Endianness/byte-lane organization (§3.5) is intentionally **not** in this roadmap — it lives above the
 transactor (Decision 2).
+
+---
+
+## 10. Continuous Integration
+
+GitHub Actions runs the simulation suite on every push/PR to `main` (`.github/workflows/ci.yml`):
+
+1. **`fvutils/ivpm-setup@v1`** — installs IVPM and runs `ivpm update` for the `default` + `default-dev`
+   dep-sets, fetching `fwprotocol-defs` (TB macros + protocol-defs flow package), the dv-flow libraries,
+   UVM, Verilator, and the dfm Python venv. Content-addressed dependency caching is on by default.
+2. **`dv-flow/run-dvflow@v1`** — runs the DFM sim tasks via the project `.envrc` (direnv), publishing a
+   report bundle as a job-summary + artifact and failing the job on any failed task. Tasks run:
+   `core-b2b-sim-run`, `mon-sim-run`, and the seven `uvm-test-*` entrypoints.
+
+**Dependency cleanup (fragility removal):** `fwvip-common` was removed entirely — it was unused (all TB
+macros come from `fwprotocol-defs`; no dfm task referenced it) and its GitHub HEAD is an incompatible rename
+(`org.fwvip.common`) that a fresh `ivpm update` would otherwise fetch and fail importing. `fwprotocol-defs`
+is now a **direct** `ivpm.yaml` dependency (previously reached only transitively through fwvip-common), and
+the `packages/fwvip-common/flow.yaml` import was dropped from `flow.yaml`. Verified locally: the image
+rebuilds and the UVM suite passes with no fwvip-common present.
+
+> Formal tasks are not yet in CI (the sandbox's `dv-flow-libformal` only exposes BMC; the cover bench is
+> commented out — see the sim-setup notes). Add once a formal toolchain is wired into the CI image.

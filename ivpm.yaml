@@ -26,8 +26,11 @@ package:
 
   - name: default
     deps:
-    - name: fwvip-common
-      url: https://github.com/featherweight-vip/fwvip-common.git
+    # Provides the Wishbone/RV testbench macros (wishbone_macros.svh,
+    # rv_macros.svh) and the org.featherweight-ip.protocol-defs flow package.
+    # Declared directly (previously reached transitively via fwvip-common).
+    - name: fwprotocol-defs
+      url: https://github.com/featherweight-ip/fwprotocol-defs.git
 
   
   paths:

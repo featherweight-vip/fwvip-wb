@@ -9,7 +9,6 @@ package:
 
   imports:
   - "${{ rootdir }}/packages/fwprotocol-defs/flow.yaml"
-  - "${{ rootdir }}/packages/fwvip-common/flow.yaml"
 
   tasks: []
 

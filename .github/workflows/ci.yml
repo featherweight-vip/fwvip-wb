@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  sim:
+    name: Simulation tests (Verilator)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Fetch dependencies declared in ivpm.yaml (protocol-defs, dv-flow libs,
+      # UVM, Verilator, the dfm Python venv, ...). Both dep-sets are pulled:
+      #   default     -> fwprotocol-defs (TB macros + protocol-defs flow pkg)
+      #   default-dev -> dv-flow-libhdlsim (Verilator/UVM), pyhdl-if, pytest-dfm
+      - name: Setup IVPM + fetch dependencies
+        uses: fvutils/ivpm-setup@v1
+        with:
+          python-version: '3.11'
+          dep-set: |
+            default
+            default-dev
+
+      # Run the DV Flow Manager simulation tasks. dfm builds each SimImage once
+      # and runs the listed SimRun tasks against it; the report bundle is
+      # uploaded as an artifact and summarized in the job summary.
+      - name: Run simulation tests
+        uses: dv-flow/run-dvflow@v1
+        with:
+          ui: log
+          tasks: >-
+            org.featherweight-vip.fwvip-wb.core-b2b-sim-run
+            org.featherweight-vip.fwvip-wb.mon-sim-run
+            org.featherweight-vip.fwvip-wb.uvm-test-smoke
+            org.featherweight-vip.fwvip-wb.uvm-test-write
+            org.featherweight-vip.fwvip-wb.uvm-test-read
+            org.featherweight-vip.fwvip-wb.uvm-test-rand
+            org.featherweight-vip.fwvip-wb.uvm-test-sel
+            org.featherweight-vip.fwvip-wb.uvm-test-err
+            org.featherweight-vip.fwvip-wb.uvm-test-reg
