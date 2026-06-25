@@ -21,6 +21,11 @@ package:
       url: https://github.com/dv-flow/dv-flow-libhdlsim.git
     - name: dv-flow-libformal
       url: https://github.com/dv-flow/dv-flow-libformal.git
+    - name: fwvip-common
+      url: https://github.com/featherweight-vip/fwvip-common.git
+    - name: iverilog
+      src: gh-rls 
+      url: https://github.com/edapack/iverilog-bin
     - name: cocotb
       src: pypi
 

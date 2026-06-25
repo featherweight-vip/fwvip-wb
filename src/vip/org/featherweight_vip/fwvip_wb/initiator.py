@@ -1,35 +1,32 @@
+# ----------------------------------------------------------------------------
+# Wishbone initiator front-end: a friendly developer API over an
+# InitiatorBackend. Knows the Wishbone protocol (packing); delegates all
+# stream/handshake work to the backend.
+# ----------------------------------------------------------------------------
 from __future__ import annotations
-import zuspec.dataclasses as zdc
-from typing import Protocol
 
-class IInitiatorBFM(Protocol):
-    pass
+from typing import Optional
 
-class InitiatorBFM(zdc.Component):
-    DATA_WIDTH : zdc.u32 = zdc.const(default=32)
-    ADDR_WIDTH : zdc.u32 = zdc.const(default=32)
-    clock : zdc.bit = zdc.input()
-    reset : zdc.bit = zdc.input()
-    init : WBInitiator = zdc.bundle(
-        init=lambda s:dict(DATA_WIDTH=s.DATA_WIDTH, ADDR_WIDTH=s.ADDR_WIDTH))
-
-    bfm_if : IInitiatorBFM = zdc.export()
-
-    async def read(self, addr : zdc.u64) -> zdc.u64:
-        # Setup packed struct
-        # Push to request fifo
-        # Wait for response from response fifo
-        return 0
+from .backend import InitiatorBackend
+from .transaction import WbLayout, WbReq, WbRsp
 
 
-    pass
+class WbInitiator:
+    def __init__(self, backend: InitiatorBackend,
+                 addr_width: int = 32, data_width: int = 32):
+        self._backend = backend
+        self.layout = WbLayout(addr_width, data_width)
 
-class InitiatorBFMCore(zdc.Component):
-    init : WBInitiator = zdc.bundle(
-        init=lambda s:dict(DATA_WIDTH=s.DATA_WIDTH, ADDR_WIDTH=s.ADDR_WIDTH))
-    # FIFO interface bundles for req/rsp 
-    pass
+    async def reset_done(self) -> None:
+        await self._backend.reset_done()
 
-class InitiatorBFMSV(InitiatorBFM):
-    # TODO: add domain annotations
-    pass
+    async def request(self, req: WbReq) -> WbRsp:
+        """Issue an arbitrary request and return its response."""
+        await self._backend.push_request(self.layout.pack_req(req))
+        return self.layout.unpack_rsp(await self._backend.pop_response())
+
+    async def write(self, adr: int, dat: int, sel: Optional[int] = None) -> WbRsp:
+        return await self.request(WbReq(adr=adr, dat=dat, we=True, sel=sel))
+
+    async def read(self, adr: int, sel: Optional[int] = None) -> WbRsp:
+        return await self.request(WbReq(adr=adr, dat=0, we=False, sel=sel))

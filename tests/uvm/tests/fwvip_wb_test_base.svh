@@ -9,7 +9,7 @@
 // (e.g. +NUM_TXNS, +BASE_ADDR) and read by the virtual sequence itself.
 //
 // Each DFM "test" task is therefore just this image invoked with a different
-// +SEQ= (and optional knob) plusargs -- see src/verif/tests/tests.yaml.
+// +SEQ= (and optional knob) plusargs -- see tests/uvm/tests/flow.yaml.
 // ----------------------------------------------------------------------------
 class fwvip_wb_test_base extends uvm_test;
     `uvm_component_utils(fwvip_wb_test_base)

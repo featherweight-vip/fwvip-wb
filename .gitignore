@@ -120,7 +120,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-# NOTE: anchored to repo root so they do not match src/verif/env/ (the UVM env)
+# NOTE: anchored to repo root so they do not match tests/uvm/env/ (the UVM env)
 #.env
 .venv
 /env/

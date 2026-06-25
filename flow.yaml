@@ -14,4 +14,4 @@ package:
 
   fragments:
   - src/vip/vip.yaml
-  - src/verif/verif.yaml
+  - tests/flow.yaml

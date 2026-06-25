@@ -12,7 +12,7 @@ fragment:
     - org.featherweight-ip.protocol-defs.all-rtlsrc
     with:
       type: systemVerilogSource
-      base: tb
+      base: .
       include: ["fwvip_wb_transactor_core_b2b.sv"]
 
   - name: core-b2b-sim-img
@@ -40,7 +40,7 @@ fragment:
     - org.featherweight-ip.protocol-defs.all-rtlsrc
     with:
       type: systemVerilogSource
-      base: tb
+      base: .
       include: ["fwvip_wb_monitor_core_tb.sv"]
 
   - name: mon-sim-img
@@ -60,32 +60,14 @@ fragment:
     - mon-sim-img
 
   # ----------------------------------------------------------------------
-  # UVM environment
+  # UVM testbench: HDL/HVL tops + the compiled UVM simulation image.
   # ----------------------------------------------------------------------
-  - name: env
-    uses: std.FileSet
-    needs: [vip-uvm-hvlsrc]
-    with:
-      type: systemVerilogSource
-      base: env
-      incdirs: ["."]
-      include: "*.sv"
-
-  - name: tests
-    uses: std.FileSet
-    needs: [env]
-    with:
-      type: systemVerilogSource
-      base: tests
-      incdirs: ["."]
-      include: "*.sv"
-
   - name: uvm-tb
     uses: std.FileSet
     needs: [tests]
     with:
       type: systemVerilogSource
-      base: tb
+      base: .
       incdirs: ["."]
       include:
       - fwvip_wb_hdl_top.sv
@@ -105,7 +87,7 @@ fragment:
       - TRACE_EN
 
   # Bare UVM run (no scenario selected -> base test runs the default smoke
-  # virtual sequence). Concrete per-test entrypoints live in tests/tests.yaml.
+  # virtual sequence). Concrete per-test entrypoints live in uvm/tests/flow.yaml.
   - name: uvm-sim-run-base
     uses: hdlsim.${{sim}}.SimRun
     needs:
@@ -113,7 +95,3 @@ fragment:
     with:
       plusargs:
       - UVM_TESTNAME=fwvip_wb_test_base
-
-  fragments:
-  - tests/tests.yaml
-  - formal/formal.yaml

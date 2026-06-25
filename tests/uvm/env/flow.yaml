@@ -1,0 +1,16 @@
+
+fragment:
+
+  tasks:
+  # ----------------------------------------------------------------------
+  # UVM environment: reusable components (agents, scoreboard, vseq library,
+  # virtual sequencer) packaged in fwvip_wb_env_pkg.
+  # ----------------------------------------------------------------------
+  - name: env
+    uses: std.FileSet
+    needs: [vip-uvm-hvlsrc]
+    with:
+      type: systemVerilogSource
+      base: .
+      incdirs: ["."]
+      include: "*.sv"

@@ -56,11 +56,11 @@ Note there is **no separate `rty`**, no `cti`/`bte`, no tags, and `dat_w`/`dat_r
 
 | Level | Target | Method | Existing assets |
 |---|---|---|---|
-| L0 — Core unit (formal) | `*_xtor_core` modules | Formal (assume/assert/cover) + protocol checker | `src/verif/formal/*_formal_tb.sv`, `fwvip_wb_checkers` |
+| L0 — Core unit (formal) | `*_xtor_core` modules | Formal (assume/assert/cover) + protocol checker | `tests/formal/*_formal_tb.sv`, `fwvip_wb_checkers` |
 | L1 — Core unit (sim) | `*_xtor_core` modules | Directed SV TB driving RV + WB sides | `tb/fwvip_wb_transactor_core_b2b.sv`, `tb/fwvip_wb_monitor_core_tb.sv` |
 | L2 — Interface/FIFO | `*_xtor_if` (FIFO + task API) | Directed SV TB exercising put/get/request/response | *new* |
 | L3 — Integrated transactor | `*_xtor` (if+core) | Back-to-back initiator↔target through task API | partial (`hdl_top`/`hvl_top`) |
-| L4 — UVM VIP | agents, driver, seq, monitor, reg adapter | UVM tests w/ scoreboard | `src/verif/tests/*`, `src/verif/env/*` (implemented — see §2.1) |
+| L4 — UVM VIP | agents, driver, seq, monitor, reg adapter | UVM tests w/ scoreboard | `tests/uvm/tests/*`, `tests/uvm/env/*` (implemented — see §2.1) |
 
 Each test below is tagged with the level(s) at which it should run.
 
@@ -71,7 +71,7 @@ Each test below is tagged with the level(s) at which it should run.
 All L4 simulation tests are UVM tests built on a **single base test driving a plusarg-selected virtual
 sequence**. Adding a test = adding a virtual sequence + a one-line DFM task; no new test class.
 
-**Components (reusable, in `src/verif/env/`, package `fwvip_wb_env_pkg`):**
+**Components (reusable, in `tests/uvm/env/`, package `fwvip_wb_env_pkg`):**
 - `fwvip_wb_vseqr` — virtual sequencer; holds handles to the initiator and target sub-sequencers and the
   initiator config (for reset sync). Instantiated in `fwvip_wb_env` and wired in its `connect_phase`.
 - `fwvip_wb_scoreboard` — reusable subscriber on the monitor analysis port (Decision 4). Builds a reference
@@ -83,13 +83,13 @@ sequence**. Adding a test = adding a virtual sequence + a one-line DFM task; no 
   forks the responder, exposes `do_write()`/`do_read()`; scenarios override `stimulus()`.
 - `fwvip_wb_vseq_lib` — generic scenarios: `write`, `read`, `smoke`, `rand`, `sel`, `err`.
 
-**Test + scenario selection (in `src/verif/tests/`, package `fwvip_wb_tests_pkg`):**
+**Test + scenario selection (in `tests/uvm/tests/`, package `fwvip_wb_tests_pkg`):**
 - `fwvip_wb_test_base` — the *only* UVM test class. Builds the env + `fwvip_wb_mon_sub`, reads `+SEQ=<vseq
   type name>` (default `fwvip_wb_vseq_smoke`), creates that virtual sequence via the factory, and runs it on
   `m_env.m_vseqr`. `report_phase` flags zero monitor traffic.
 - `fwvip_wb_vseq_reg` — register-model virtual sequence (carries the `uvm_reg` block) for `+SEQ=…_reg`.
 
-**DFM entrypoints (one root task per test, in `src/verif/tests/tests.yaml`):** each runs `uvm-sim-img` with
+**DFM entrypoints (one root task per test, in `tests/uvm/tests/tests.yaml`):** each runs `uvm-sim-img` with
 `+UVM_TESTNAME=fwvip_wb_test_base +SEQ=<vseq>`. Run with `dfm run org.featherweight-vip.fwvip-wb.<task>`.
 
 | DFM task | `+SEQ=` | Plan coverage | Status |

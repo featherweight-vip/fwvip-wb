@@ -1,7 +1,9 @@
+
 fragment:
 
   # --------------------------------------------------------------------------
-  # UVM simulation tests.
+  # UVM tests: the test class (fwvip_wb_test_base) plus the per-scenario DFM
+  # entrypoints.
   #
   # Every test runs the same image + UVM test class (fwvip_wb_test_base); the
   # scenario is chosen by the +SEQ=<virtual-sequence> plusarg. Each task below
@@ -11,6 +13,15 @@ fragment:
   # --------------------------------------------------------------------------
 
   tasks:
+  - name: tests
+    uses: std.FileSet
+    needs: [env]
+    with:
+      type: systemVerilogSource
+      base: .
+      incdirs: ["."]
+      include: "*.sv"
+
   # Default smoke: block of writes then self-checked read-back
   - name: uvm-test-smoke
     uses: hdlsim.${{sim}}.SimRun

@@ -1,0 +1,43 @@
+
+fragment:
+
+  tasks:
+  # ----------------------------------------------------------------------
+  # Cocotb smoke: initiator/target/monitor cores wired in a plain Verilog
+  # top, driven from Python via cocotb on Icarus Verilog.
+  #
+  # This flow is Icarus-specific (cocotb + iverilog), so it pins
+  # hdlsim.ivl directly rather than using ${{sim}}.
+  # ----------------------------------------------------------------------
+  - name: cocotb-tb-src
+    uses: std.FileSet
+    with:
+      type: systemVerilogSource
+      base: .
+      include: ["fwvip_wb_cocotb_top.sv"]
+
+  # Python testbench, copied into the run directory (added to PYTHONPATH)
+  - name: cocotb-py-src
+    uses: std.FileSet
+    with:
+      type: simRunData
+      base: .
+      include: ["test_fwvip_wb.py"]
+
+  - name: cocotb-sim-img
+    uses: hdlsim.ivl.SimImage
+    needs:
+    - xtor-core
+    - cocotb-tb-src
+    with:
+      top: ["fwvip_wb_cocotb_top"]
+
+  - name: cocotb-sim-run
+    uses: hdlsim.ivl.SimRun
+    needs:
+    - cocotb-sim-img
+    - cocotb-py-src
+    with:
+      cocotb: true
+      cocotb_toplevel: fwvip_wb_cocotb_top
+      cocotb_test_modules: test_fwvip_wb
