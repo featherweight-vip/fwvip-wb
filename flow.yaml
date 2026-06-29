@@ -1,6 +1,6 @@
 
 package:
-  name: org.featherweight-vip.fwvip-wb
+  name: org.fwvip.wb
   with:
     sim:
       type: str 
@@ -8,10 +8,15 @@ package:
 
 
   imports:
-  - "${{ rootdir }}/packages/fwprotocol-defs/flow.yaml"
+  # The core Wishbone transactor now lives here (migrated out of this VIP).
+  # (fwprotocol-defs was dropped; its TB macros are vendored locally as bus-macros.)
+  - "${{ rootdir }}/packages/fw-proto-wb/flow.yaml"
+  # Core clock/reset transactors + their UVM config providers (org.fwvip.core).
+  # The TB binds these and the env consumes them for reset synchronization.
+  - "${{ rootdir }}/packages/fwvip-core/flow.yaml"
 
   tasks: []
 
   fragments:
-  - src/vip/vip.yaml
+  - src/vip.yaml
   - tests/flow.yaml

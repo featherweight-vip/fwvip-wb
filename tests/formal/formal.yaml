@@ -11,9 +11,10 @@ fragment:
   - name: initiator-tb-bmc
     uses: formal.sby.BMC
     needs:
-    - xtor-core
+    - bus-macros
+    - fw.proto.wb.xtor-core
     - initiator-tb-hdlsrc
-    - assertions
+    - fw.proto.wb.checker
     with:
       top: fwvip_wb_initiator_formal_tb
 
@@ -24,7 +25,7 @@ fragment:
 #    needs:
 #    - sv-hdlsrc
 #    - initiator-tb-hdlsrc
-#    - assertions
+#    - fw.proto.wb.checker
 #    with:
 #      top: fwvip_wb_initiator_formal_tb
 #      options: |

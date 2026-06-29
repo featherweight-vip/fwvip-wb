@@ -1,6 +1,25 @@
 
 fragment:
 
+  tasks:
+  # ----------------------------------------------------------------------
+  # Wishbone/RV testbench convenience macros (port-list helpers like
+  # WB_MONITOR_PORT). These are testbench plumbing -- no delivered VIP source
+  # uses them -- so they live with the tests, not in src/. Provides the incdir
+  # for `include "wishbone_macros.svh"` / "rv_macros.svh". Consumed by the UVM
+  # and formal TBs via `needs: [bus-macros]`.
+  # (Originally from the external fwprotocol-defs package, vendored locally.)
+  # ----------------------------------------------------------------------
+  - name: bus-macros
+    uses: std.FileSet
+    with:
+      type: systemVerilogSource
+      base: macros
+      incdirs: ["."]
+      include:
+      - wishbone_macros.svh
+      - rv_macros.svh
+
   fragments:
   - uvm/env/flow.yaml
   - uvm/tb/flow.yaml

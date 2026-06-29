@@ -77,7 +77,7 @@ module fwvip_wb_target_formal_tb;
     end
 
     // Instantiate target core
-    fwvip_wb_target_xtor_core #(
+    wb_target_xtor_core #(
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH)
     ) u_tgt (
@@ -100,21 +100,21 @@ module fwvip_wb_target_formal_tb;
         .rsp_ready(rsp_ready)
     );
 
-    // Checker monitors target bus signals (mapped to m*)
-    fwvip_wb_checkers #(
+    // The kit's protocol checker monitors the target bus signals
+    wb_proto_checker #(
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH)
     ) u_chk (
         .clock(clock),
         .reset(reset),
-        .madr(tadr),
-        .mdat_w(tdat_w),
-        .mdat_r(tdat_r),
-        .mwe(twe),
-        .mstb(tstb),
-        .msel(tsel),
-        .mack(tack),
-        .merr(terr),
-        .mcyc(tcyc)
+        .adr(tadr),
+        .dat_w(tdat_w),
+        .dat_r(tdat_r),
+        .sel(tsel),
+        .we(twe),
+        .cyc(tcyc),
+        .stb(tstb),
+        .ack(tack),
+        .err(terr)
     );
 endmodule

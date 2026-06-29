@@ -32,7 +32,7 @@ module fwvip_wb_monitor_core_tb;
   logic                  mon_ready;
 
   // DUT
-  fwvip_wb_monitor_xtor_core #(
+  wb_monitor_xtor_core #(
     .ADDR_WIDTH(ADDR_WIDTH),
     .DATA_WIDTH(DATA_WIDTH),
     .MON_WIDTH(MON_WIDTH)

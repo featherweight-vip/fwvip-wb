@@ -4,12 +4,12 @@ fragment:
   tasks:
   # ----------------------------------------------------------------------
   # Core back-to-back smoke: initiator core <-> target core (no SV layer).
-  # Uses the Wishbone/RV convenience macros from protocol-defs.
+  # Uses the Wishbone/RV convenience macros vendored locally (bus-macros).
   # ----------------------------------------------------------------------
   - name: core-b2b-tb-src
     uses: std.FileSet
     needs:
-    - org.featherweight-ip.protocol-defs.all-rtlsrc
+    - bus-macros
     with:
       type: systemVerilogSource
       base: .
@@ -18,7 +18,7 @@ fragment:
   - name: core-b2b-sim-img
     uses: hdlsim.${{sim}}.SimImage
     needs:
-    - xtor-core
+    - fw.proto.wb.xtor-core
     - core-b2b-tb-src
     with:
       top: ["fwvip_wb_transactor_core_b2b"]
@@ -37,7 +37,7 @@ fragment:
   - name: mon-tb-src
     uses: std.FileSet
     needs:
-    - org.featherweight-ip.protocol-defs.all-rtlsrc
+    - bus-macros
     with:
       type: systemVerilogSource
       base: .
@@ -46,7 +46,7 @@ fragment:
   - name: mon-sim-img
     uses: hdlsim.${{sim}}.SimImage
     needs:
-    - xtor-core
+    - fw.proto.wb.xtor-core
     - mon-tb-src
     with:
       top: ["fwvip_wb_monitor_core_tb"]
@@ -76,9 +76,12 @@ fragment:
   - name: uvm-sim-img
     uses: hdlsim.${{sim}}.SimImage
     needs:
-    - org.featherweight-ip.protocol-defs.all-rtlsrc
+    - bus-macros
     - hdlsim.${{sim}}.SimLibUVM
-    - xtor-sv
+    - xtor-pkg
+    - fw.proto.wb.xtor-sv
+    # Core clock/reset transactor interfaces instantiated by fwvip_wb_hdl_top.
+    - org.fwvip.core.clock-reset-xtor
     - uvm-tb
     with:
       top: [fwvip_wb_hvl_top]

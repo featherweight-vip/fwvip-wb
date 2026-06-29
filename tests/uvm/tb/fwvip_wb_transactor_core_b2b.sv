@@ -62,7 +62,7 @@ module fwvip_wb_transactor_core_b2b;
   // ------------------------------------------------------------------------
   // Instantiate Initiator Core
   // ------------------------------------------------------------------------
-  fwvip_wb_initiator_xtor_core #(
+  wb_initiator_xtor_core #(
     .ADDR_WIDTH(ADDR_WIDTH),
     .DATA_WIDTH(DATA_WIDTH)
   ) u_initiator (
@@ -76,7 +76,7 @@ module fwvip_wb_transactor_core_b2b;
   // ------------------------------------------------------------------------
   // Instantiate Target Core
   // ------------------------------------------------------------------------
-  fwvip_wb_target_xtor_core #(
+  wb_target_xtor_core #(
     .ADDR_WIDTH(ADDR_WIDTH),
     .DATA_WIDTH(DATA_WIDTH)
   ) u_target (

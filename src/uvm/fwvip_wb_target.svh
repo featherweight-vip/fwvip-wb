@@ -7,7 +7,9 @@ class fwvip_wb_target extends uvm_agent;
     `uvm_component_utils(fwvip_wb_target)
 
     fwvip_wb_target_config               m_cfg;
-    uvm_sequencer #(fwvip_wb_transaction)   m_seqr;
+    // The sequencer item is the responder wrapper (it implements
+    // fwvip_wb_target_if), so the driver's get_next_item yields a callable handler.
+    uvm_sequencer #(fwvip_wb_target_item)   m_seqr;
     fwvip_wb_target_driver               m_driver;
 
     function new(string name, uvm_component parent);
@@ -22,7 +24,7 @@ class fwvip_wb_target extends uvm_agent;
         end else begin
             $display("Got config");
         end
-        m_seqr = uvm_sequencer #(fwvip_wb_transaction)::type_id::create("m_seqr", this);
+        m_seqr = uvm_sequencer #(fwvip_wb_target_item)::type_id::create("m_seqr", this);
         m_driver = fwvip_wb_target_driver::type_id::create("m_driver", this);
     endfunction
 

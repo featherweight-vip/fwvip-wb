@@ -8,7 +8,9 @@ fragment:
   # ----------------------------------------------------------------------
   - name: env
     uses: std.FileSet
-    needs: [vip-uvm-hvlsrc]
+    # fwvip_wb_env_pkg imports fwvip_core_pkg + fwvip_core_uvm_pkg, so the core
+    # UVM provider package (and its plain-SV base) must compile first.
+    needs: [vip-uvm-hvlsrc, org.fwvip.core.core-uvm-pkg]
     with:
       type: systemVerilogSource
       base: .

@@ -26,7 +26,7 @@ module fwvip_wb_hdl_top;
   `WB_WIRES(wb_, ADDR_WIDTH, DATA_WIDTH);
 
   // Initiator transactor (drives the bus)
-  fwvip_wb_initiator_xtor #(
+  wb_initiator_xtor #(
     .ADDR_WIDTH(ADDR_WIDTH),
     .DATA_WIDTH(DATA_WIDTH)
   ) u_initiator (
@@ -36,7 +36,7 @@ module fwvip_wb_hdl_top;
   );
 
   // Target transactor (responds on the bus)
-  fwvip_wb_target_xtor #(
+  wb_target_xtor #(
     .ADDR_WIDTH(ADDR_WIDTH),
     .DATA_WIDTH(DATA_WIDTH)
   ) u_target (
@@ -46,13 +46,26 @@ module fwvip_wb_hdl_top;
   );
 
   // Monitor transactor (passively observes the bus)
-  fwvip_wb_monitor_xtor #(
+  wb_monitor_xtor #(
     .ADDR_WIDTH(ADDR_WIDTH),
     .DATA_WIDTH(DATA_WIDTH)
   ) u_monitor (
     .clock(clock),
     .reset(reset),
     `WB_CONNECT( , wb_)
+  );
+
+  // Core clock/reset transactors. These back the fwvip-core clock/reset config
+  // providers, which the env uses for reset synchronization (replacing the old
+  // fixed-delay wait_reset workaround in the initiator config).
+  fwvip_clock_xtor_if u_clk_if (
+    .clock (clock),
+    .reset (reset)
+  );
+
+  fwvip_reset_xtor_if #(.ACTIVE(1)) u_rst_if (
+    .clock (clock),
+    .reset (reset)
   );
 
 endmodule

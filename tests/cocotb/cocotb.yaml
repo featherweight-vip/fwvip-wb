@@ -4,10 +4,19 @@ fragment:
   tasks:
   # ----------------------------------------------------------------------
   # Cocotb smoke: initiator/target/monitor cores wired in a plain Verilog
-  # top, driven from Python via cocotb on Icarus Verilog.
+  # top, driven from Python via cocotb. We run the SAME top + test on BOTH
+  # simulators:
+  #   * Verilator (cocotb.vlt / hdlsim.vlt)  -> org.fwvip.wb.cocotb-check
+  #   * Icarus    (cocotb.ivl / hdlsim.ivl)  -> org.fwvip.wb.cocotb-ivl-check
   #
-  # This flow is Icarus-specific (cocotb + iverilog), so it pins
-  # hdlsim.ivl directly rather than using ${{sim}}.
+  # The cocotb top drives TOP-LEVEL reg/logic signals (init_*/tgt_*/mon_*),
+  # not sub-instance core ports, which works on both simulators -- so one top
+  # + one backend covers both. (Driving sub-instance input ports works on
+  # Icarus but NOT Verilator, which recomputes them each eval; see the backend
+  # docstring + the skill design §11.2 #9.)
+  #
+  # cocotb support comes from the dv-flow-libcocotb package (the cocotb.* tasks),
+  # which emits data items that drive the plain hdlsim.<sim> tasks.
   # ----------------------------------------------------------------------
   - name: cocotb-tb-src
     uses: std.FileSet
@@ -16,28 +25,52 @@ fragment:
       base: .
       include: ["fwvip_wb_cocotb_top.sv"]
 
-  # Python testbench, copied into the run directory (added to PYTHONPATH)
-  - name: cocotb-py-src
-    uses: std.FileSet
+  # Selects the cocotb test module + HDL toplevel (shared by both sims).
+  - name: cocotb-testcfg
+    uses: cocotb.TestConfig
     with:
-      type: simRunData
-      base: .
-      include: ["test_fwvip_wb.py"]
+      module: ["test_fwvip_wb"]
+      toplevel: fwvip_wb_cocotb_top
 
-  - name: cocotb-sim-img
-    uses: hdlsim.ivl.SimImage
-    needs:
-    - xtor-core
-    - cocotb-tb-src
+  # ---- Verilator chain (primary entrypoint: cocotb-check) ---------------
+  # pythonpath makes both the testbench module (this dir) and the Wishbone VIP
+  # front-end (src/python -> import org.fwvip.wb) importable at sim runtime;
+  # libcocotb does NOT inherit the ambient PYTHONPATH, so both must be listed.
+  - name: cocotb-vlt-setup
+    uses: cocotb.vlt.Setup
+    with:
+      pythonpath: [".", "../../src/python"]
+
+  - name: cocotb-vlt-sim-img
+    uses: hdlsim.vlt.SimImage
+    needs: [fw.proto.wb.xtor-core, cocotb-tb-src, cocotb-vlt-setup]
     with:
       top: ["fwvip_wb_cocotb_top"]
 
-  - name: cocotb-sim-run
-    uses: hdlsim.ivl.SimRun
-    needs:
-    - cocotb-sim-img
-    - cocotb-py-src
+  - name: cocotb-vlt-sim-run
+    uses: hdlsim.vlt.SimRun
+    needs: [cocotb-vlt-sim-img, cocotb-testcfg]
+
+  - name: cocotb-check
+    uses: cocotb.CheckResults
+    needs: [cocotb-vlt-sim-run]
+
+  # ---- Icarus chain -----------------------------------------------------
+  - name: cocotb-ivl-setup
+    uses: cocotb.ivl.Setup
     with:
-      cocotb: true
-      cocotb_toplevel: fwvip_wb_cocotb_top
-      cocotb_test_modules: test_fwvip_wb
+      pythonpath: [".", "../../src/python"]
+
+  - name: cocotb-ivl-sim-img
+    uses: hdlsim.ivl.SimImage
+    needs: [fw.proto.wb.xtor-core, cocotb-tb-src, cocotb-ivl-setup]
+    with:
+      top: ["fwvip_wb_cocotb_top"]
+
+  - name: cocotb-ivl-sim-run
+    uses: hdlsim.ivl.SimRun
+    needs: [cocotb-ivl-sim-img, cocotb-testcfg]
+
+  - name: cocotb-ivl-check
+    uses: cocotb.CheckResults
+    needs: [cocotb-ivl-sim-run]

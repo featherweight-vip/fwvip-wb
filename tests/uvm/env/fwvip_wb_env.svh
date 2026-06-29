@@ -24,11 +24,23 @@ class fwvip_wb_env extends uvm_component;
     endfunction
 
     function void connect_phase(uvm_phase phase);
+        fwvip_reset_config reset_cfg;
+        fwvip_clock_config clock_cfg;
         super.connect_phase(phase);
         // Wire the virtual sequencer to the sub-sequencers and initiator config
         m_vseqr.init_seqr = m_init.m_seqr;
         m_vseqr.targ_seqr = m_targ.m_seqr;
         m_vseqr.init_cfg  = m_init.m_cfg;
+        // Source the core clock/reset providers (set by the TB) and hand them to
+        // the virtual sequencer for reset synchronization / clock pacing.
+        if (uvm_config_db #(fwvip_reset_config)::get(this, "", "reset", reset_cfg))
+            m_vseqr.reset_provider = reset_cfg;
+        else
+            `uvm_fatal(get_type_name(), "no reset provider (fwvip_reset_config) in config DB")
+        if (uvm_config_db #(fwvip_clock_config)::get(this, "", "clock", clock_cfg))
+            m_vseqr.clock_provider = clock_cfg;
+        else
+            `uvm_fatal(get_type_name(), "no clock provider (fwvip_clock_config) in config DB")
         // Monitor stream feeds the scoreboard
         m_mon.ap.connect(m_sb.analysis_export);
     endfunction

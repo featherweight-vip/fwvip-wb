@@ -63,7 +63,7 @@ module fwvip_wb_initiator_formal_tb(
     end
 
     // Instantiate initiator core
-    fwvip_wb_initiator_xtor_core #(
+    wb_initiator_xtor_core #(
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH)
     ) u_init (
@@ -118,7 +118,9 @@ module fwvip_wb_initiator_formal_tb(
 
     reg[7:0] rcount;
     reg[7:0] wcount;
-    always @(posedge clock or posedge reset) begin
+    // Single-edge (synchronous reset): a `cover` lives in this block, and the
+    // yosys async2sync formal prep rejects multi-trigger $check cells.
+    always @(posedge clock) begin
         if (reset) begin
             rcount <= '0;
             wcount <= '0;
@@ -134,22 +136,22 @@ module fwvip_wb_initiator_formal_tb(
         end
     end
 
-    // Instantiate checker (monitoring initiator bus signals)
-    fwvip_wb_checkers #(
+    // Instantiate the kit's protocol checker (monitoring initiator bus signals)
+    wb_proto_checker #(
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH),
-        .MAX_CYCLE_LEN(2)
+        .MAX_WAIT(2)
     ) u_chk (
         .clock(clock),
         .reset(reset),
-        .madr(iadr),
-        .mdat_w(idat_w),
-        .mdat_r(idat_r),
-        .mwe(iwe),
-        .mstb(istb),
-        .msel(isel),
-        .mack(iack),
-        .merr(ierr),
-        .mcyc(icyc)
+        .adr(iadr),
+        .dat_w(idat_w),
+        .dat_r(idat_r),
+        .sel(isel),
+        .we(iwe),
+        .cyc(icyc),
+        .stb(istb),
+        .ack(iack),
+        .err(ierr)
     );
 endmodule

@@ -35,12 +35,12 @@ jobs:
         with:
           ui: log
           tasks: >-
-            org.featherweight-vip.fwvip-wb.core-b2b-sim-run
-            org.featherweight-vip.fwvip-wb.mon-sim-run
-            org.featherweight-vip.fwvip-wb.uvm-test-smoke
-            org.featherweight-vip.fwvip-wb.uvm-test-write
-            org.featherweight-vip.fwvip-wb.uvm-test-read
-            org.featherweight-vip.fwvip-wb.uvm-test-rand
-            org.featherweight-vip.fwvip-wb.uvm-test-sel
-            org.featherweight-vip.fwvip-wb.uvm-test-err
-            org.featherweight-vip.fwvip-wb.uvm-test-reg
+            org.fwvip.wb.core-b2b-sim-run
+            org.fwvip.wb.mon-sim-run
+            org.fwvip.wb.uvm-test-smoke
+            org.fwvip.wb.uvm-test-write
+            org.fwvip.wb.uvm-test-read
+            org.fwvip.wb.uvm-test-rand
+            org.fwvip.wb.uvm-test-sel
+            org.fwvip.wb.uvm-test-err
+            org.fwvip.wb.uvm-test-reg

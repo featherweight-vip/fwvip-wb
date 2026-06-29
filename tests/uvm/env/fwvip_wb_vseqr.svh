@@ -12,10 +12,18 @@ class fwvip_wb_vseqr extends uvm_sequencer;
 
     // Sub-sequencers coordinated by virtual sequences
     uvm_sequencer #(fwvip_wb_transaction)   init_seqr;
-    uvm_sequencer #(fwvip_wb_transaction)   targ_seqr;
+    // Target sub-sequencer item type is the responder wrapper (see fwvip_wb_target).
+    uvm_sequencer #(fwvip_wb_target_item)   targ_seqr;
 
-    // Initiator config, used for clock/reset synchronization helpers
+    // Initiator config (legacy handle; reset sync now goes through the core
+    // reset provider below).
     fwvip_wb_initiator_config               init_cfg;
+
+    // Core clock/reset providers, sourced from the config DB by the env. The
+    // base virtual sequence waits on reset_provider before driving; sequences
+    // may also pace themselves on clock_provider.tick().
+    fwvip_wait_reset_if                     reset_provider;
+    fwvip_clock_if                          clock_provider;
 
     function new(string name, uvm_component parent);
         super.new(name, parent);

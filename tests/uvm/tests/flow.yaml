@@ -8,7 +8,7 @@ fragment:
   # Every test runs the same image + UVM test class (fwvip_wb_test_base); the
   # scenario is chosen by the +SEQ=<virtual-sequence> plusarg. Each task below
   # is a DFM root entrypoint -- run e.g.:
-  #   dfm run org.featherweight-vip.fwvip-wb.uvm-test-smoke
+  #   dfm run org.fwvip.wb.uvm-test-smoke
   # Per-scenario knobs (e.g. +NUM_TXNS, +BASE_ADDR) can be appended as plusargs.
   # --------------------------------------------------------------------------
 

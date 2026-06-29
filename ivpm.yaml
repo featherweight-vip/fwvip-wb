@@ -13,16 +13,26 @@ package:
     deps:
     - name: pytest
       src: pypi
+    - name: click
+      src: pypi
+    - name: fw-proto-wb
+      url: https://github.com/featherweight-ip/fw-proto-wb.git
+    - name: fw-proto-uart
+      url: https://github.com/featherweight-ip/fw-proto-uart.git
+    - name: fwvip-uart
+      url: https://github.com/featherweight-vip/fwvip-uart.git
     - name: pyhdl-if
       url: https://github.com/fvutils/pyhdl-if.git
     - name: pytest-dfm
       url: https://github.com/dv-flow/pytest-dfm.git
+    - name: dv-flow-libcocotb
+      url: https://github.com/dv-flow/dv-flow-libcocotb.git
     - name: dv-flow-libhdlsim
       url: https://github.com/dv-flow/dv-flow-libhdlsim.git
     - name: dv-flow-libformal
       url: https://github.com/dv-flow/dv-flow-libformal.git
-    - name: fwvip-common
-      url: https://github.com/featherweight-vip/fwvip-common.git
+    - name: fwvip-core
+      url: https://github.com/featherweight-vip/fwvip-core.git
     - name: iverilog
       src: gh-rls 
       url: https://github.com/edapack/iverilog-bin
@@ -30,12 +40,11 @@ package:
       src: pypi
 
   - name: default
-    deps:
-    # Provides the Wishbone/RV testbench macros (wishbone_macros.svh,
-    # rv_macros.svh) and the org.featherweight-ip.protocol-defs flow package.
-    # Declared directly (previously reached transitively via fwvip-common).
-    - name: fwprotocol-defs
-      url: https://github.com/featherweight-ip/fwprotocol-defs.git
+    # fwprotocol-defs was removed: the only thing the VIP used from it was the
+    # Wishbone/RV testbench macros, now vendored locally under src/macros
+    # (exported as the `bus-macros` FileSet). The core transactor itself comes
+    # from fw-proto-wb (default-dev).
+    deps: []
 
   
   paths:

@@ -45,9 +45,11 @@ class fwvip_wb_initiator_config_p #(type vif_t=int, int ADDR_WIDTH=32, int DATA_
         end
     endtask
 
-    virtual task wait_reset();
-        vif.wait_reset();
-    endtask
+    // NOTE: reset synchronization is no longer the initiator config's job. The
+    // env sources an independent fwvip-core reset provider (fwvip_wait_reset_if)
+    // from the UVM config DB and the base virtual sequence waits on that. The
+    // old fixed-delay wait_reset workaround has been removed; the inherited
+    // base wait_reset() is a harmless no-op kept only for API compatibility.
 
 endclass
 

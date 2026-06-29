@@ -1,6 +1,6 @@
 # ----------------------------------------------------------------------------
 # Cocotb testbench for fwvip_wb_cocotb_top, exercising the backend-independent
-# Wishbone VIP front-end (org.featherweight_vip.fwvip_wb) over its cocotb
+# Wishbone VIP front-end (org.fwvip.wb) over its cocotb
 # backend. The test code talks only to the friendly front-end API; the cocotb
 # backends handle all FIFO/handshake interaction with the transactor cores.
 # ----------------------------------------------------------------------------
@@ -8,8 +8,8 @@ import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import RisingEdge, FallingEdge
 
-from org.featherweight_vip.fwvip_wb import WbInitiator, WbTarget, WbMonitor
-from org.featherweight_vip.fwvip_wb.cocotb import (
+from org.fwvip.wb import WbInitiator, WbTarget, WbMonitor
+from org.fwvip.wb.cocotb import (
     CocotbInitiatorBackend,
     CocotbTargetBackend,
     CocotbMonitorBackend,
@@ -29,11 +29,13 @@ async def test_wb_write_read(dut):
     """3 writes then 3 reads via the VIP front-end, checked through the monitor."""
     cocotb.start_soon(Clock(dut.clock, 10, unit="ns").start())
 
-    # Front-end drivers, each bound to a cocotb backend constructed from a
-    # handle to the corresponding transactor core.
-    initiator = WbInitiator(CocotbInitiatorBackend(dut.u_initiator))
-    target = WbTarget(CocotbTargetBackend(dut.u_target))
-    monitor = WbMonitor(CocotbMonitorBackend(dut.u_monitor))
+    # Front-end drivers, each bound to a cocotb backend constructed from the
+    # top-level dut handle and the corresponding role signal prefix. Driving
+    # top-level signals (rather than core sub-instance ports) is what lets this
+    # run on both Verilator and Icarus.
+    initiator = WbInitiator(CocotbInitiatorBackend(dut, "init_"))
+    target = WbTarget(CocotbTargetBackend(dut, "tgt_"))
+    monitor = WbMonitor(CocotbMonitorBackend(dut, "mon_"))
 
     await apply_reset(dut)
     await initiator.reset_done()

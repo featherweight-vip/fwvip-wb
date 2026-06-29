@@ -67,9 +67,9 @@ class fwvip_wb_vseq_base extends uvm_sequence;
         fwvip_wb_target_seq resp;
         get_cfg();
 
-        // Synchronize to reset before driving
-        if (p_sequencer.init_cfg != null) begin
-            p_sequencer.init_cfg.wait_reset();
+        // Synchronize to reset before driving, via the core reset provider.
+        if (p_sequencer.reset_provider != null) begin
+            p_sequencer.reset_provider.wait_reset();
         end
 
         // Launch the background responder on the target

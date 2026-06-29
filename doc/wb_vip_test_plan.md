@@ -90,7 +90,7 @@ sequence**. Adding a test = adding a virtual sequence + a one-line DFM task; no 
 - `fwvip_wb_vseq_reg` — register-model virtual sequence (carries the `uvm_reg` block) for `+SEQ=…_reg`.
 
 **DFM entrypoints (one root task per test, in `tests/uvm/tests/tests.yaml`):** each runs `uvm-sim-img` with
-`+UVM_TESTNAME=fwvip_wb_test_base +SEQ=<vseq>`. Run with `dfm run org.featherweight-vip.fwvip-wb.<task>`.
+`+UVM_TESTNAME=fwvip_wb_test_base +SEQ=<vseq>`. Run with `dfm run org.fwvip.wb.<task>`.
 
 | DFM task | `+SEQ=` | Plan coverage | Status |
 |---|---|---|---|

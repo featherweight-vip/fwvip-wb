@@ -4,8 +4,8 @@
 # Construct a backend with a cocotb handle to a transactor core instance and
 # hand it to the matching front-end driver, e.g.:
 #
-#     from org.featherweight_vip.fwvip_wb import WbInitiator
-#     from org.featherweight_vip.fwvip_wb.cocotb import CocotbInitiatorBackend
+#     from org.fwvip.wb import WbInitiator
+#     from org.fwvip.wb.cocotb import CocotbInitiatorBackend
 #
 #     init = WbInitiator(CocotbInitiatorBackend(dut.u_initiator))
 #     await init.reset_done()

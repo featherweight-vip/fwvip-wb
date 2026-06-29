@@ -1,0 +1,50 @@
+
+fragment:
+  tasks:
+  # ----------------------------------------------------------------------
+  # The core transactor now lives in the fw-proto-wb package (fw.proto.wb.*).
+  # The VIP consumes its transactor-only exports:
+  #   fw.proto.wb.xtor-core -- the 3 signal-level core modules
+  #   fw.proto.wb.xtor-sv   -- the 3 SV interfaces + 3 integration modules
+  # (see the top-level flow.yaml `imports:` for fw-proto-wb).
+  #
+  # Consumer-side width constants (ADDR_WIDTH_MAX/DATA_WIDTH_MAX) stay with the
+  # VIP (migration Decision D4) in fwvip_wb_xtor_pkg, compiled before the UVM
+  # package that imports it.
+  # ----------------------------------------------------------------------
+  - export: xtor-pkg
+    uses: std.FileSet
+    with:
+      type: systemVerilogSource
+      base: uvm
+      incdirs: ["."]
+      include:
+      - fwvip_wb_xtor_pkg.sv
+
+  # ----------------------------------------------------------------------
+  # UVM agent layer (classes) built on top of the SV transactors.
+  # ----------------------------------------------------------------------
+  - name: vip-uvm-hvlsrc
+    needs:
+    - xtor-pkg
+    - fw.proto.wb.xtor-sv
+    # Class layer: wb_proto_if + the *_xtor_bridge classes. The target config
+    # implements wb_proto_if and lets wb_target_xtor_bridge poll the FIFOs /
+    # call access(). (needs xtor-sv transitively; compiled before fwvip_wb_pkg.)
+    - fw.proto.wb.class
+    uses: std.FileSet
+    with:
+      type: systemVerilogSource
+      base: uvm
+      # Just the package compilation unit; the xtor pkg is the separate
+      # `xtor-pkg` export above (same dir), and the .svh classes are pulled in
+      # via the incdir. Globbing "*.sv" here would double-compile the xtor pkg.
+      include:
+      - fwvip_wb_pkg.sv
+      incdirs: ["."]
+
+  # NOTE: the protocol-invariant checker is no longer vendored here. The VIP's
+  # formal TBs consume the kit's reusable checker fileset `fw.proto.wb.checker`
+  # (module wb_proto_checker) directly -- it supersedes the old local
+  # fwvip_wb_checker (a strict superset, and single-edge so it survives the
+  # yosys async2sync formal prep).
