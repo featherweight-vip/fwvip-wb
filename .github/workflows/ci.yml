@@ -22,7 +22,7 @@ jobs:
       - name: Setup IVPM + fetch dependencies
         uses: fvutils/ivpm-setup@v1
         with:
-          python-version: '3.11'
+          python-version: '3.12'
           dep-set: |
             default
             default-dev
