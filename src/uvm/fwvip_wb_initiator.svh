@@ -16,12 +16,8 @@ class fwvip_wb_initiator extends uvm_agent;
 
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
-        $display("get_full_name: %0s", get_full_name());
-        if (!uvm_config_db #(fwvip_wb_initiator_config)::get(this, "", "cfg", m_cfg)) begin
-            $display("Failed to get config");
-        end else begin
-            $display("Got config");
-        end
+        if (!uvm_config_db #(fwvip_wb_initiator_config)::get(this, "", "cfg", m_cfg))
+            `uvm_fatal(get_type_name(), "no fwvip_wb_initiator_config in config DB")
         m_seqr = uvm_sequencer #(fwvip_wb_transaction)::type_id::create("m_seqr", this);
         m_driver = fwvip_wb_initiator_driver::type_id::create("m_driver", this);
     endfunction

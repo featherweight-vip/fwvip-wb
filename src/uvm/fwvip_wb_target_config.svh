@@ -98,3 +98,50 @@ class fwvip_wb_target_config_p #(type vif_t=int, int ADDR_WIDTH=32, int DATA_WID
     endtask
 
 endclass
+
+
+// Client-registered specialization: instead of routing each captured request
+// through the driver/sequencer (config_p above), it holds a REGISTERED wb_proto_if
+// client (the responder -- a sequence or model that implements access()) and, on
+// start(), wires the kit converter (wb_target_xtor_bridge) straight to it: the
+// converter polls the transactor FIFOs and drives an active access() call into the
+// client. So a sequence becomes a WB target simply by implementing wb_proto_if.
+// The SAME client can be reached directly (no converter) on the TLM path via an
+// fw_export connector -- one responder, per-flavour connectors.
+class fwvip_wb_target_config_ap #(int ADDR_WIDTH=32, int DATA_WIDTH=32)
+    extends fwvip_wb_target_config;
+    typedef fwvip_wb_target_config_ap #(ADDR_WIDTH, DATA_WIDTH) this_t;
+    virtual wb_target_xtor_if #(ADDR_WIDTH, DATA_WIDTH) vif;
+    wb_proto_if #(ADDR_WIDTH, DATA_WIDTH)               client;   // registered responder
+    wb_target_xtor_bridge #(ADDR_WIDTH, DATA_WIDTH)     m_conv;   // the converter
+
+    static function void set(uvm_component ctxt, string inst, string field,
+                             virtual wb_target_xtor_if #(ADDR_WIDTH, DATA_WIDTH) vif,
+                             wb_proto_if #(ADDR_WIDTH, DATA_WIDTH) client);
+        this_t cfg = new();
+        cfg.vif    = vif;
+        cfg.client = client;
+        uvm_config_db #(fwvip_wb_target_config)::set(ctxt, inst, field, cfg);
+    endfunction
+
+    virtual function fwvip_wb_target_params_s get_params();
+        fwvip_wb_target_params_s params;
+        params.ADDR_WIDTH = ADDR_WIDTH;
+        params.DATA_WIDTH = DATA_WIDTH;
+        return params;
+    endfunction
+
+    virtual function int getADDR_WIDTH(); return ADDR_WIDTH; endfunction
+    virtual function int getDATA_WIDTH(); return DATA_WIDTH; endfunction
+
+    // Converter: wait_req -> client.access() -> send_rsp. No driver/sequencer.
+    virtual task start(fwvip_wb_target_driver drv);
+        m_conv = new(vif, client);
+        m_conv.start();
+    endtask
+
+    virtual task wait_reset();
+        vif.wait_reset();
+    endtask
+
+endclass

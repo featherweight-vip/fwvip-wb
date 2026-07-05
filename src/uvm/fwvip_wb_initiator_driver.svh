@@ -13,22 +13,15 @@ class fwvip_wb_initiator_driver extends uvm_driver #(fwvip_wb_transaction);
 
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
-        if (!uvm_config_db #(fwvip_wb_initiator_config)::get(this, "", "cfg", m_cfg)) begin
-            $display("Failed to get config");
-        end else begin
-            $display("Got config");
-        end
+        if (!uvm_config_db #(fwvip_wb_initiator_config)::get(this, "", "cfg", m_cfg))
+            `uvm_fatal(get_type_name(), "no fwvip_wb_initiator_config in config DB")
     endfunction
 
     task run_phase(uvm_phase phase);
         fwvip_wb_transaction t;
         forever begin
-            $display("--> driver.get");
             seq_item_port.get_next_item(t);
-            $display("<-- driver.get");
-            $display("--> access");
             m_cfg.access(t);
-            $display("<-- access");
             seq_item_port.item_done();
         end
     endtask
