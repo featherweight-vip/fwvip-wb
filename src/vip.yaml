@@ -24,7 +24,7 @@ fragment:
   # ----------------------------------------------------------------------
   # UVM agent layer (classes) built on top of the SV transactors.
   # ----------------------------------------------------------------------
-  - name: vip-uvm-hvlsrc
+  - export: vip-uvm-hvlsrc
     needs:
     - xtor-pkg
     - fw.proto.wb.xtor-sv
