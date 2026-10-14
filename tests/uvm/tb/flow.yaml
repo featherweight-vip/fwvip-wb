@@ -64,7 +64,7 @@ fragment:
   # ----------------------------------------------------------------------
   - name: uvm-tb
     uses: std.FileSet
-    needs: [tests]
+    needs: [uvm-tests-src]
     with:
       type: systemVerilogSource
       base: .
@@ -73,12 +73,19 @@ fragment:
       - fwvip_wb_hdl_top.sv
       - fwvip_wb_hvl_top.sv
 
+  # PINNED TO VERILATOR, not the project's `--sim`: this is the simulator the
+  # UVM suite supports today. A `--sim` value with no UVM support (ivl) would
+  # otherwise fail the whole project at LOAD -- before selection could prune
+  # the UVM cases -- so `dfm run tests-cocotb --sim ivl` could not work. For
+  # the same reason the image takes no project flag holders (they follow
+  # `--sim`), so `--build`/`--cov` do not reach it yet. Both go once a test
+  # can declare the tools it runs on.
   - name: uvm-sim-img
-    uses: hdlsim.${{sim}}.SimImage
+    uses: hdlsim.vlt.SimImage
     needs:
     - bus-macros
-    - hdlsim.${{sim}}.SimLibUVM
-    - xtor-pkg
+    - hdlsim.vlt.SimLibUVM
+    - org.fwvip.wb.xtor-pkg
     - fw.proto.wb.xtor-sv
     # Core clock/reset transactor interfaces instantiated by fwvip_wb_hdl_top.
     - org.fwvip.core.clock-reset-xtor
@@ -92,7 +99,7 @@ fragment:
   # Bare UVM run (no scenario selected -> base test runs the default smoke
   # virtual sequence). Concrete per-test entrypoints live in uvm/tests/flow.yaml.
   - name: uvm-sim-run-base
-    uses: hdlsim.${{sim}}.SimRun
+    uses: hdlsim.vlt.SimRun
     needs:
     - uvm-sim-img
     with:

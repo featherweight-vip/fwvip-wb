@@ -3,20 +3,18 @@ fragment:
 
   tasks:
   # ----------------------------------------------------------------------
-  # Cocotb smoke: initiator/target/monitor cores wired in a plain Verilog
-  # top, driven from Python via cocotb. We run the SAME top + test on BOTH
-  # simulators:
-  #   * Verilator (cocotb.vlt / hdlsim.vlt)  -> org.fwvip.wb.cocotb-check
-  #   * Icarus    (cocotb.ivl / hdlsim.ivl)  -> org.fwvip.wb.cocotb-ivl-check
+  # cocotb suite: the initiator/target/monitor cores wired in a plain Verilog
+  # top, driven from Python through the VIP's front-end (org.fwvip.wb).
   #
-  # The cocotb top drives TOP-LEVEL reg/logic signals (init_*/tgt_*/mon_*),
-  # not sub-instance core ports, which works on both simulators -- so one top
-  # + one backend covers both. (Driving sub-instance input ports works on
-  # Icarus but NOT Verilator, which recomputes them each eval; see the backend
-  # docstring + the skill design §11.2 #9.)
+  # cocotb is a MODE the simulator runs in, so the simulator is the project's
+  # `--sim` knob, as for every other image and run:
+  #   dfm run tests-cocotb                 # on the default simulator (vlt)
+  #   dfm run tests-cocotb --sim ivl       # on Icarus
   #
-  # cocotb support comes from the dv-flow-libcocotb package (the cocotb.* tasks),
-  # which emits data items that drive the plain hdlsim.<sim> tasks.
+  # The top drives TOP-LEVEL reg/logic signals (init_*/tgt_*/mon_*), not
+  # sub-instance core ports, which works on both Verilator and Icarus. (Driving
+  # sub-instance input ports works on Icarus but NOT Verilator, which
+  # recomputes them each eval; see the backend docstring.)
   # ----------------------------------------------------------------------
   - name: cocotb-tb-src
     uses: std.FileSet
@@ -25,52 +23,44 @@ fragment:
       base: .
       include: ["fwvip_wb_cocotb_top.sv"]
 
-  # Selects the cocotb test module + HDL toplevel (shared by both sims).
+  # What every case shares: the test module and the HDL toplevel. Each case
+  # narrows it to its own test function.
   - name: cocotb-testcfg
     uses: cocotb.TestConfig
     with:
       module: ["test_fwvip_wb"]
       toplevel: fwvip_wb_cocotb_top
 
-  # ---- Verilator chain (primary entrypoint: cocotb-check) ---------------
-  # pythonpath makes both the testbench module (this dir) and the Wishbone VIP
-  # front-end (src/python -> import org.fwvip.wb) importable at sim runtime;
-  # libcocotb does NOT inherit the ambient PYTHONPATH, so both must be listed.
-  - name: cocotb-vlt-setup
-    uses: cocotb.vlt.Setup
+  # cocotb's per-simulator pieces (GPI library, run-time env, and for
+  # Verilator its C++ main). pythonpath makes the testbench module (this dir)
+  # and the VIP front-end (src/python) importable at sim run time; the
+  # simulator does NOT inherit the ambient PYTHONPATH, so both are listed.
+  - name: cocotb-setup
+    uses: cocotb.${{ sim }}.Setup
     with:
       pythonpath: [".", "../../src/python"]
 
-  - name: cocotb-vlt-sim-img
-    uses: hdlsim.vlt.SimImage
-    needs: [fw.proto.wb.xtor-core, cocotb-tb-src, cocotb-vlt-setup]
+  - name: cocotb-img
+    uses: hdlsim.${{ sim }}.SimImage
+    needs: [fw.proto.wb.xtor-core, cocotb-tb-src, cocotb-setup, flags-img]
     with:
       top: ["fwvip_wb_cocotb_top"]
 
-  - name: cocotb-vlt-sim-run
-    uses: hdlsim.vlt.SimRun
-    needs: [cocotb-vlt-sim-img, cocotb-testcfg]
-
-  - name: cocotb-check
-    uses: cocotb.CheckResults
-    needs: [cocotb-vlt-sim-run]
-
-  # ---- Icarus chain -----------------------------------------------------
-  - name: cocotb-ivl-setup
-    uses: cocotb.ivl.Setup
-    with:
-      pythonpath: [".", "../../src/python"]
-
-  - name: cocotb-ivl-sim-img
-    uses: hdlsim.ivl.SimImage
-    needs: [fw.proto.wb.xtor-core, cocotb-tb-src, cocotb-ivl-setup]
-    with:
-      top: ["fwvip_wb_cocotb_top"]
-
-  - name: cocotb-ivl-sim-run
-    uses: hdlsim.ivl.SimRun
-    needs: [cocotb-ivl-sim-img, cocotb-testcfg]
-
-  - name: cocotb-ivl-check
-    uses: cocotb.CheckResults
-    needs: [cocotb-ivl-sim-run]
+  # The suite. One cell per cocotb test function; each is a cocotb.<sim>.Case
+  # (run + verdict from results.xml), so a failing test never stops the
+  # others and no results at all is an error, not a pass.
+  #
+  #   write_read  3 writes then 3 reads via the VIP front-end, checked
+  #               through the monitor
+  - name: cocotb
+    strategy:
+      matrix:
+        case:
+        - { name: write_read }
+    body:
+    - name: "${{ this.case.name }}"
+      uses: cocotb.${{ sim }}.Case
+      needs: [cocotb-img, cocotb-testcfg, "flags-run-${{ build }}"]
+      with:
+        name: "${{ this.case.name }}"
+        testcase: ["test_wb_${{ this.case.name }}"]

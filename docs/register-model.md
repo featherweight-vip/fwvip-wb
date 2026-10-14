@@ -28,7 +28,7 @@ blk.r.read (status, rdat,       .parent(this));
 
 Front-door reads return whatever the **target responder** holds, so the background memory
 responder (see {doc}`sequences`) must be running for a read to observe a prior write. The
-`org.fwvip.wb.uvm-test-reg` scenario exercises exactly this path.
+`uvm.reg` case (`dfm run tests --tests uvm.reg`) exercises exactly this path.
 
 ```{admonition} Why no back door
 :class: note

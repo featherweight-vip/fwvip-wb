@@ -1,25 +1,28 @@
-
+# yaml-language-server: $schema=https://dv-flow.github.io/flow.dv.schema.json
+#****************************************************************************
+#* flow.yaml -- org.fwvip.wb as CONSUMERS see it: the VIP sources only.
+#*
+#* This is the file ivpm's package map points at, so it is what a project
+#* that imports `org.fwvip.wb` loads. It must stay loadable in a consumer's
+#* environment, which has none of this repo's test libraries (cocotb, formal,
+#* SVUnit) -- so no tests, and no imports a consumer would not already have.
+#*
+#* Developers of this repo get flow.dv instead: dfm prefers flow.dv when it
+#* searches for the root package. flow.dv is a separate project,
+#* org.fwvip.wb.dev, that imports this package exactly as a consumer does
+#* and adds the tests.
+#*
+#* Imports are by NAME. The root project's package map resolves them, so
+#* this works wherever the consumer's packages/ directory is. (A path such as
+#* ${{ rootdir }}/packages/... names the CONSUMER's root, and only resolved
+#* because consumers happened to fetch fw-proto-wb into packages/.)
+#****************************************************************************
 package:
   name: org.fwvip.wb
-  with:
-    sim:
-      type: str 
-      value: "vlt"
-
 
   imports:
-  # The core Wishbone transactor now lives here (migrated out of this VIP).
-  # (fwprotocol-defs was dropped; its TB macros are vendored locally as bus-macros.)
-  - "${{ rootdir }}/packages/fw-proto-wb/flow.yaml"
-  # Core clock/reset transactors + their UVM config providers (org.fwvip.core).
-  # The TB binds these and the env consumes them for reset synchronization.
-  - "${{ rootdir }}/packages/fwvip-core/flow.yaml"
-
-  tasks: []
+  - fw.proto.wb             # Wishbone transactors, class layer and checker
+  - org.fwvip.core          # clock/reset transactors + their UVM config
 
   fragments:
   - src/vip.yaml
-  # tests/flow.yaml dropped locally (as for fwvip-gpio): it pulls cocotb.* tasks
-  # (dv-flow-libcocotb, not imported here). fw-wb-dma consumes only the VIP src
-  # (org.fwvip.wb.vip-uvm-hvlsrc). ivpm re-fetch reverts this local patch.
-  # - tests/flow.yaml

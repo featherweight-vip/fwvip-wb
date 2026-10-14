@@ -1,46 +1,131 @@
+# featherweight-vip/fwvip-wb -- GitHub Actions.
+#
+# COPY THIS AS A PAIR. Its counterpart is .forgejo/workflows/ci.yml. If
+# .forgejo/workflows/ is absent the Forgejo runner falls back to running THIS
+# FILE. The two differ only where the forges do: the Forgejo side adds the
+# internal-identifier check and uses forgejo/upload-artifact, and has no CTRF
+# reporter (the action is not on its mirror, and Forgejo renders no job
+# summary to put it in). This side also passes GITHUB_TOKEN to ci/run.sh
+# (on Forgejo that token is not a GitHub one) and uses actions/cache v5 (the
+# Forgejo mirror is tested on v4). If you are changing anything else, they
+# are drifting.
+#
+# What runs is ci/run.sh -- the same script on both forges, and on a laptop.
+# This file only sets up the cache, calls it, and shows the results.
+#
+# NOTHING HERE PUBLISHES. That is why there is no release-authority `gate` job
+# (see dvkit/forgejo-ops templates/). If a publish job is ever added, add the
+# gate with it, on both sides.
+
 name: CI
 
 on:
   push:
-    branches: [main]
+    branches: ['**']
   pull_request:
-    branches: [main]
   workflow_dispatch:
 
+permissions:
+  # The CTRF reporter's job summary and annotations need no more than this.
+  contents: read
+
 jobs:
-  sim:
-    name: Simulation tests (Verilator)
-    runs-on: ubuntu-latest
+  checks:
+    name: Tests (UVM, cocotb, formal)
+    # 24.04, not ubuntu-latest: on the Forgejo runner ubuntu-latest is a 22.04
+    # image with Python 3.10, which nothing in this stack is tested on. Named
+    # the same on both sides so the two runs are the same environment.
+    runs-on: ubuntu-24.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      # Fetch dependencies declared in ivpm.yaml (protocol-defs, dv-flow libs,
-      # UVM, Verilator, the dfm Python venv, ...). Both dep-sets are pulled:
-      #   default     -> fwprotocol-defs (TB macros + protocol-defs flow pkg)
-      #   default-dev -> dv-flow-libhdlsim (Verilator/UVM), pyhdl-if, pytest-dfm
-      - name: Setup IVPM + fetch dependencies
-        uses: fvutils/ivpm-setup@v1
+      # The ivpm cache holds the prebuilt tools (Verilator, from edapack).
+      # Restore and save are separate steps so the save key can name what the
+      # cache HOLDS after ci/run.sh, not what ivpm.yaml says -- see
+      # ci/ivpm-cache-key.sh. The prefix restores the newest saved cache;
+      # ivpm fetches only what it lacks, and ci/run.sh prunes what no run uses.
+      - name: Restore the ivpm package cache
+        id: ivpm-restore
+        uses: actions/cache/restore@v5
         with:
-          python-version: '3.12'
-          dep-set: |
-            default
-            default-dev
+          path: ~/.cache/ivpm
+          key: ivpm-${{ runner.os }}-
+          restore-keys: |
+            ivpm-${{ runner.os }}-
 
-      # Run the DV Flow Manager simulation tasks. dfm builds each SimImage once
-      # and runs the listed SimRun tasks against it; the report bundle is
-      # uploaded as an artifact and summarized in the job summary.
-      - name: Run simulation tests
-        uses: dv-flow/run-dvflow@v1
+      - name: Tests
+        # ci/run.sh points IVPM_CACHE at ~/.cache/ivpm, the path cached above.
+        env:
+          # Lets ivpm resolve edapack's `latest` releases through the GitHub
+          # API when its unauthenticated path cannot: anonymous API calls get
+          # 60 an hour, shared by every job on the runner's address.
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ci/run.sh
+
+      - name: Compute the ivpm cache key
+        id: ivpm-key
+        if: always()
+        run: |
+          k=$(ci/ivpm-cache-key.sh)
+          echo "key=${k:+ivpm-${{ runner.os }}-$k}" >> "$GITHUB_OUTPUT"
+
+      - name: Save the ivpm package cache
+        # Only when the contents changed (and there are some): an unchanged
+        # cache is already saved under this key.
+        if: >-
+          always() && steps.ivpm-key.outputs.key != '' &&
+          steps.ivpm-key.outputs.key != steps.ivpm-restore.outputs.cache-matched-key
+        uses: actions/cache/save@v5
         with:
-          ui: log
-          tasks: >-
-            org.fwvip.wb.core-b2b-sim-run
-            org.fwvip.wb.mon-sim-run
-            org.fwvip.wb.uvm-test-smoke
-            org.fwvip.wb.uvm-test-write
-            org.fwvip.wb.uvm-test-read
-            org.fwvip.wb.uvm-test-rand
-            org.fwvip.wb.uvm-test-sel
-            org.fwvip.wb.uvm-test-err
-            org.fwvip.wb.uvm-test-reg
+          path: ~/.cache/ivpm
+          key: ${{ steps.ivpm-key.outputs.key }}
+
+      # One reporter per check, so each harness/tool pair gets its own titled
+      # table. `failed` rows are the cases that did not pass.
+      - name: UVM (Verilator) results
+        if: always()
+        uses: ctrf-io/github-test-reporter@v1
+        with:
+          report-path: ci-reports/ctrf/uvm.json
+          title: UVM (Verilator)
+          summary-report: true
+          failed-report: true
+          exit-on-no-files: false
+
+      - name: cocotb (Verilator) results
+        if: always()
+        uses: ctrf-io/github-test-reporter@v1
+        with:
+          report-path: ci-reports/ctrf/cocotb-vlt.json
+          title: cocotb (Verilator)
+          summary-report: true
+          failed-report: true
+          exit-on-no-files: false
+
+      - name: cocotb (Icarus) results
+        if: always()
+        uses: ctrf-io/github-test-reporter@v1
+        with:
+          report-path: ci-reports/ctrf/cocotb-ivl.json
+          title: cocotb (Icarus)
+          summary-report: true
+          failed-report: true
+          exit-on-no-files: false
+
+      - name: Formal (SymbiYosys) results
+        if: always()
+        uses: ctrf-io/github-test-reporter@v1
+        with:
+          report-path: ci-reports/ctrf/formal.json
+          title: Formal (SymbiYosys)
+          summary-report: true
+          failed-report: true
+          exit-on-no-files: false
+
+      - name: Upload the reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-reports
+          path: ci-reports/
+          if-no-files-found: warn

@@ -21,7 +21,7 @@ the `fwvip-core` clock/reset providers — **it never re-defines those.** DFM pa
 |---|---|---|---|---|
 | **initiator** | driving / active — the VIP *calls* `vif.request()/response()` | `fwvip_wb_initiator` | `fwvip_wb_initiator_config(_p)`, `fwvip_wb_initiator_driver` | `uvm_sequence #(fwvip_wb_transaction)` (e.g. `fwvip_wb_initiator_seq`) |
 | **target** | callback responder — the kit bridge *calls back* per request | `fwvip_wb_target` | `fwvip_wb_target_config(_p)`, `fwvip_wb_target_driver` | `fwvip_wb_target_seq` (extend it) |
-| **monitor** | passive analysis producer — poll-loop on the vif | `fwvip_wb_monitor_agent` (and `fwvip_wb_monitor`) | `fwvip_wb_monitor_config(_p)` | none; `uvm_analysis_port #(fwvip_wb_transaction)` |
+| **monitor** | passive analysis producer — poll-loop on the vif | `fwvip_wb_monitor_agent` | `fwvip_wb_monitor_config(_p)` | none; `uvm_analysis_port #(fwvip_wb_transaction)` |
 
 Plus: `fwvip_wb_transaction` (the data item), `fwvip_wb_target_if` / `fwvip_wb_target_item`
 (responder API + wrapper item), `fwvip_wb_reg_adapter` (reg-model front door). All ship in
@@ -99,9 +99,7 @@ end
 ```
 
 Pass the wrapper's `.u_if` as the vif — the macro wraps it in the right `virtual ...#(AW,DW)`
-type and calls `*_config_p::set(...)` into the config DB. (An uppercase
-`FWVIP_WB_INITIATOR_REGISTER` variant exists that uses `fwvip_wb_initiator_if` instead of the
-kit `wb_initiator_xtor_if` — use the lowercase one with the kit wrapper.)
+type and calls `*_config_p::set(...)` into the config DB at the `inst` path you give it.
 
 The **env** retrieves the providers and hands them to the virtual sequencer; the base virtual
 sequence waits on reset before stimulus (see "Sequences" below). See `tests/uvm/env/*` for the
@@ -237,17 +235,16 @@ and `pop()` drains via an `Event` (no polling). See `fwvip-core/docs/cocotb-perf
 
 ## Runnable example
 
-The worked example lives in `tests/` (`tests/uvm/{tb,env,tests}/`, `tests/cocotb/`). DFM
-targets:
+The worked example lives in `tests/` (`tests/uvm/{tb,env,tests}/`, `tests/cocotb/`), run from
+this repo's developer project (`flow.dv`). `tests` is the one test command; cases are selected
+by path:
 
 ```sh
-# UVM smoke: block of writes + self-checked read-back (SEQ=fwvip_wb_vseq_smoke)
-dfm run org.fwvip.wb.uvm-test-smoke
-# other UVM scenarios: uvm-test-write / -read / -rand / -sel / -err / -reg (reg-model front door)
-dfm run org.fwvip.wb.uvm-test-reg
-
-# cocotb front-end check (Verilator); Icarus variant: org.fwvip.wb.cocotb-ivl-check
-dfm run org.fwvip.wb.cocotb-check
+dfm run tests-info                   # list the suites and cases
+dfm run tests --tests uvm.smoke      # UVM smoke (SEQ=fwvip_wb_vseq_smoke)
+dfm run tests-uvm                    # every UVM case: smoke/write/read/rand/sel/err/reg
+dfm run tests-cocotb                 # cocotb front-end check (Verilator)
+dfm run tests-cocotb --sim ivl       # the same on Icarus
 ```
 
 All UVM scenarios share one image + `UVM_TESTNAME=fwvip_wb_test_base`, selected by

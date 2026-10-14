@@ -1,6 +1,3 @@
-typedef class fwvip_wb_monitor;
-
-
 class fwvip_wb_monitor_config extends uvm_object;
     `uvm_object_utils(fwvip_wb_monitor_config)
 

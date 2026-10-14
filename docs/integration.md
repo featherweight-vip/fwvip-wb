@@ -69,13 +69,6 @@ end
 Pass the wrapper's `.u_if` as the `vif` argument — the macro wraps it in the right
 `virtual wb_*_xtor_if #(AW,DW)` type and calls `*_config_p::set(...)`.
 
-```{admonition} Use the lowercase macro with the kit wrapper
-:class: tip
-An uppercase `FWVIP_WB_INITIATOR_REGISTER` variant exists that binds against
-`fwvip_wb_initiator_if` instead of the kit `wb_initiator_xtor_if`. With the kit wrapper, use the
-lowercase `fwvip_wb_initiator_register`.
-```
-
 ## The env
 
 The reusable env (`tests/uvm/env/`) builds the three agents, a virtual sequencer, and a

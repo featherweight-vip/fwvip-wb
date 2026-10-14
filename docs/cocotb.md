@@ -75,9 +75,13 @@ the handshake. See `fwvip-core`'s *cocotb-performance* note for the full rationa
 ## Running it
 
 ```console
-$ dfm run org.fwvip.wb.cocotb-check        # Verilator
-$ dfm run org.fwvip.wb.cocotb-ivl-check    # Icarus
+$ dfm run tests-cocotb               # on the default simulator (Verilator)
+$ dfm run tests-cocotb --sim ivl     # on Icarus
 ```
+
+cocotb is a mode the simulator runs in, so the simulator is the project's `--sim` knob. Each
+case is a `cocotb.<sim>.Case`: it runs the simulator and reads cocotb's `results.xml` for the
+verdict, so no results (or zero tests) is an error, not a pass.
 
 The test (`tests/cocotb/test_fwvip_wb.py`) issues writes and reads through the front-end and
 checks them through the monitor stream — the same backend-independent API shown above.

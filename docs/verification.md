@@ -40,39 +40,56 @@ bounded-liveness + SVA X-checks) — the VIP does not vendor its own checker.
 ## The UVM test suite
 
 All L4 tests are built on a single base test (`fwvip_wb_test_base`) driving a plusarg-selected
-virtual sequence — adding a scenario is a new vseq plus a one-line DFM task, no new test class.
+virtual sequence — adding a scenario is a new vseq plus one cell in the `uvm` suite, no new test
+class.
 The reusable env (`tests/uvm/env/`) provides the virtual sequencer, an analysis-port scoreboard
 that self-checks read-back, the memory responder, and the sequence library.
 
-| DFM task | Sequence | Covers |
+| Case | Sequence | Covers |
 | --- | --- | --- |
-| `uvm-test-smoke` | `fwvip_wb_vseq_smoke` | writes + self-checked read-back, monitor |
-| `uvm-test-write` | `fwvip_wb_vseq_write` | write traffic |
-| `uvm-test-read` | `fwvip_wb_vseq_read` | read-back checking |
-| `uvm-test-rand` | `fwvip_wb_vseq_rand` | randomized mixed traffic |
-| `uvm-test-sel` | `fwvip_wb_vseq_sel` | partial byte-select transport |
-| `uvm-test-err` | `fwvip_wb_vseq_err` | ERR termination |
-| `uvm-test-reg` | `fwvip_wb_vseq_reg` | `uvm_reg` front door |
+| `uvm.smoke` | `fwvip_wb_vseq_smoke` | writes + self-checked read-back, monitor |
+| `uvm.write` | `fwvip_wb_vseq_write` | write traffic |
+| `uvm.read` | `fwvip_wb_vseq_read` | read-back checking |
+| `uvm.rand` | `fwvip_wb_vseq_rand` | randomized mixed traffic |
+| `uvm.sel` | `fwvip_wb_vseq_sel` | partial byte-select transport |
+| `uvm.err` | `fwvip_wb_vseq_err` | ERR termination |
+| `uvm.reg` | `fwvip_wb_vseq_reg` | `uvm_reg` front door |
 
 All seven run `UVM_TESTNAME=fwvip_wb_test_base` with `+SEQ=<vseq>`; knobs such as `+NUM_TXNS`
-and `+BASE_ADDR` append as plusargs. Run any with `dfm run org.fwvip.wb.<task>` (see
-{doc}`getting-started`).
+and `+BASE_ADDR` append as plusargs. Each case's verdict comes from the UVM report summary
+(a UVM `$finish` exits 0 even with errors, so the exit code is not the verdict).
+
+## Running the tests
+
+`dfm run tests` is the regression command and the CI gate; what a test is lives in the suites
+wired into it (`uvm`, `cocotb`, `formal`):
+
+```console
+$ dfm run tests                      # everything
+$ dfm run tests --tests uvm.err      # one case
+$ dfm run tests-info                 # the inventory; builds nothing
+$ dfm run smoke                      # one case per harness
+$ dfm run tests-uvm                  # `tests`, restricted to one harness
+$ dfm run tests-cocotb --sim ivl
+$ dfm run tests-formal
+```
+
+The `tests-<harness>` roots exist because not every harness runs on every tool: UVM runs on
+Verilator, cocotb on Verilator and Icarus, formal on SymbiYosys.
 
 ## cocotb
 
-The Python front-end is checked end-to-end on both simulators (`org.fwvip.wb.cocotb-check` on
-Verilator, `org.fwvip.wb.cocotb-ivl-check` on Icarus): writes and reads issued through the
-front-end are verified through the monitor stream. See {doc}`cocotb`.
+The Python front-end is checked end-to-end on both simulators (`dfm run tests-cocotb`, and
+`--sim ivl` for Icarus): writes and reads issued through the front-end are verified through the
+monitor stream. See {doc}`cocotb`.
 
 ## Continuous integration
 
-`.github/workflows/ci.yml` runs on every push/PR to `main`:
+CI runs on every push, on both GitHub and Forgejo. The two workflow files
+(`.github/workflows/ci.yml`, `.forgejo/workflows/ci.yml`) only set up a cache and call
+`ci/run.sh`, which is what runs: it fetches the `dev` dependency set with ivpm and then runs
+each harness on each tool it supports — `tests-uvm`, `tests-cocotb`, `tests-cocotb --sim ivl`
+and `tests-formal`. Every check always runs, and each writes JUnit and CTRF results. The script
+runs unchanged on a laptop (`CI_SKIP_BOOTSTRAP=1 ci/run.sh` reuses an existing `packages/`).
 
-1. **`fvutils/ivpm-setup`** fetches the `default` + `default-dev` dependency sets (the kit, the
-   dv-flow libraries, UVM, Verilator, the dfm Python venv).
-2. **`dv-flow/run-dvflow`** runs the DFM sim tasks — `core-b2b-sim-run`, `mon-sim-run`, and the
-   seven `uvm-test-*` entrypoints — failing the job on any failed task and publishing a report
-   bundle.
-
-A separate `Docs` workflow builds and publishes this site (see the repository's
-`.github/workflows/docs.yml`). Formal proofs are not yet wired into CI.
+A separate `Docs` workflow builds this site; only the Forgejo one publishes it.

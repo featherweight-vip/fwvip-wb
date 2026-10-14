@@ -25,7 +25,6 @@ package fwvip_wb_pkg;
     `include "fwvip_wb_target.svh"
 
     `include "fwvip_wb_monitor_config.svh"
-    `include "fwvip_wb_monitor.svh"
     `include "fwvip_wb_monitor_agent.svh"
 
     `include "fwvip_wb_reg_adapter.svh"

@@ -169,3 +169,7 @@ rundir/
 .codex/
 .cursor/
 
+
+# ci/run.sh working state
+.ci-venv/
+ci-reports/

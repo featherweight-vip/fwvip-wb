@@ -1,0 +1,92 @@
+# yaml-language-server: $schema=https://dv-flow.github.io/flow.dv.schema.json
+#****************************************************************************
+#* flow.dv -- the developer project for this repo: org.fwvip.wb.dev.
+#*
+#* dfm prefers flow.dv over flow.yaml when it searches for the root package,
+#* so `dfm run` here loads this file. ivpm's package map always names
+#* flow.yaml, so a consumer never loads this one, and never needs the test
+#* libraries (cocotb, formal, SVUnit) it uses.
+#*
+#* This is a separate package that imports org.fwvip.wb by name, exactly as
+#* a consumer project would. The tests therefore exercise the VIP the way it
+#* is delivered, and they name its tasks fully: org.fwvip.wb.<task>.
+#* fw-proto-wb uses the same layout, and its developer project imports this
+#* VIP back for its own tests.
+#*
+#* Running tests. `tests` is THE regression command and CI gate; what a test
+#* is lives in the suites wired into it (uvm, cocotb, formal), and selection
+#* is by path:
+#*
+#*   dfm run tests                        # everything
+#*   dfm run tests --tests uvm.err        # one case
+#*   dfm run tests-info                   # the inventory; builds nothing
+#*   dfm run smoke                        # the quick subset
+#*
+#* The tests-<harness> roots are the same command restricted to one kind of
+#* harness. They exist because not every harness runs on every tool: UVM
+#* runs on Verilator, cocotb on Verilator and Icarus, formal on sby. Run each
+#* harness on the tools it supports:
+#*
+#*   dfm run tests-uvm
+#*   dfm run tests-cocotb --sim ivl
+#*   dfm run tests-formal
+#****************************************************************************
+package:
+  name: org.fwvip.wb.dev
+
+  # The UVM project archetype (dv-flow-libproject): `tests`, `smoke`,
+  # `tests-info`, `coverage`, the --sim/--build/--cov knobs and the flag
+  # holders they select. `uses:` inherits it; the import puts it in scope.
+  uses: project.dv.uvm
+
+  # dev-package-map.yaml resolves this repo's own package; ivpm's generated
+  # map resolves everything fetched into packages/.
+  package-map:
+  - dev-package-map.yaml
+  - packages/dv-flow-package-map.yaml
+
+  imports:
+  - project.dv.uvm
+  - org.fwvip.wb
+  - fw.proto.wb
+  - org.fwvip.core
+
+  tasks:
+  # A VIP has no design of its own: the synthesizable transactor cores belong
+  # to fw-proto-wb, which lints them.
+  - override: src-rtl
+    uses: std.NotProvided
+  - override: lint-rtl
+    uses: std.NotProvided
+
+  - override: tests
+    needs: [uvm, cocotb, formal]
+
+  # One case per harness: does each one still build and pass at all.
+  - override: smoke
+    needs: [uvm, cocotb, formal]
+    with:
+      tests: [uvm.smoke, cocotb.write_read, formal.initiator-bmc]
+
+  # ---- One root per kind of harness ---------------------------------------
+  # Each IS the archetype's `tests` (same runner, selection, report and gate)
+  # wired to one suite. They inherit project.dv.tests, not this package's
+  # `tests`: an override's `needs:` is inherited too, so `uses: tests` would
+  # run every suite.
+  - root: tests-uvm
+    uses: project.dv.tests
+    needs: [uvm]
+    desc: Run the UVM tests (`tests`, restricted to the UVM suite)
+
+  - root: tests-cocotb
+    uses: project.dv.tests
+    needs: [cocotb]
+    desc: Run the cocotb tests (`tests`, restricted to the cocotb suite)
+
+  - root: tests-formal
+    uses: project.dv.tests
+    needs: [formal]
+    desc: Run the formal proofs (`tests`, restricted to the formal suite)
+
+  fragments:
+  - tests/flow.yaml

@@ -1,5 +1,3 @@
-typedef class fwvip_wb_monitor;
-
 class fwvip_wb_monitor_agent extends uvm_agent;
     `uvm_component_utils(fwvip_wb_monitor_agent)
 
