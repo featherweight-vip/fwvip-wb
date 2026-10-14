@@ -65,12 +65,15 @@ if [ "${CI_SKIP_BOOTSTRAP:-0}" != "1" ]; then
         $sudo apt-get update -qq && $sudo apt-get install -y -qq direnv >/dev/null \
             || { echo "::error::could not install direnv"; exit 1; }
     fi
+    # uv as well as ivpm: without uv, ivpm installs python content with pip,
+    # whose editable install writes egg-info into the package -- and a cached
+    # package (yosys) is a read-only directory, so it fails.
     python3 -m venv .ci-venv \
-        && .ci-venv/bin/pip install -q --upgrade pip ivpm \
+        && .ci-venv/bin/pip install -q --upgrade pip ivpm uv \
         || { echo "::error::could not install ivpm"; exit 1; }
     .ci-venv/bin/ivpm --version 2>/dev/null || true
     # -a: clone git URLs as written (HTTPS). A runner has no ssh identity.
-    .ci-venv/bin/ivpm update -a -d "$dep_set" \
+    PATH="$root/.ci-venv/bin:$PATH" .ci-venv/bin/ivpm update -a -d "$dep_set" \
         || { echo "::error::ivpm update -d $dep_set failed"; exit 1; }
     # Drop cache entries no run has linked for a while, so the saved cache
     # does not grow without bound.
